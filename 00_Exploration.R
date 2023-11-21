@@ -61,16 +61,25 @@ contient_station <- st_contains(map_iris$geometry, liste_coordonnees_stations)
 
 liste_lignes <- as.data.frame(contient_station)$row.id
 
-liste_IRIS <- map_iris[liste_lignes,]$CODE_IRIS
+liste_IRIS_beneficiaires <- map_iris[liste_lignes,]$CODE_IRIS
 
 
 ######## On assigne la variable de traitement
 
 filo_2012[, beneficiaire := 0]
-filo_2012[IRIS %in% liste_IRIS, beneficiaire := 1]
+filo_2012[IRIS %in% liste_IRIS_beneficiaires, beneficiaire := 1]
 
 filo_2020[, beneficiaire := 0]
-filo_2020[IRIS %in% liste_IRIS, beneficiaire := 1]
+filo_2020[IRIS %in% liste_IRIS_beneficiaires, beneficiaire := 1]
 
 table(filo_2012$beneficiaire)
-table(filo_2020$beneficiaire)
+table(filo_2020$beneficiaire) # Problème : on a 8 IRIS de différence parmi les bénéficiaires. On regarde quels IRIS c'est
+
+liste_1 <- setdiff(filo_2020[beneficiaire == 1]$IRIS, filo_2012[beneficiaire == 1]$IRIS)
+liste_2 <- setdiff(liste_iris_2012, liste_iris_2020)
+liste_IRIS_beneficiaires
+
+setdiff(liste_1, liste_2)
+setdiff(liste_2, liste_IRIS_beneficiaires)
+
+liste_IRIS_beneficiaires

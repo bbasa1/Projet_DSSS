@@ -1,0 +1,5 @@
+library(readxl)
+library(data.table)
+library(sf)
+library(tmap)
+tmap_mode('view')
