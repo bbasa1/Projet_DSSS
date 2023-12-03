@@ -13,6 +13,7 @@ repo_inter <- paste(repgen, "Bases_intermediaires" , sep = "/")
 
 # On commence par importer les packages
 source(paste(repo_prgm , "01_packages.R" , sep = "/"))
+source(paste(repo_prgm , "02_Traces_graphiques.R" , sep = "/"))
 
 
 
@@ -100,63 +101,59 @@ contient_station <- st_contains(map_iris$geometry, liste_coordonnees_stations)
 liste_lignes <- as.data.frame(contient_station)$row.id
 liste_IRIS_beneficiaires <- map_iris[liste_lignes,]$CODE_IRIS
 
-
 ######## On assigne la variable de traitement
 
 filo_merged[, beneficiaire := 0]
 filo_merged[IRIS %in% liste_IRIS_beneficiaires, beneficiaire := 1]
 
+length(liste_IRIS_beneficiaires) - nrow(filo_merged)
+
+
 colnames(filo_2012)
 colonne_trace <- "DEC_TP60" # La racine de la variable souhaitée
 # DEC_RD = Rapport interdécile 9/1
 # DEC_TP60 = Taux de bas revenus déclarés au seuil de 60%
+label_colonne_trace <- "Taux de bas revenus déclarés au seuil de 60%"
+titre_save <- paste(repo_sorties, "Trace_DECTP60_IRIS.pdf", sep = "/")
+label_color <- "IRIS bénéficiaires\ndu GPE"
+titre <- "Taux de bas revenus déclarés au seuil de 60 % du revenu déclaré par unité de consommation médian métropolitain (%)\nen fonction des années, pour les IRIS bénéficiaires et non bénéficiaires du GPE"
 
 
+table_RD_for_plot <- preparation_table_stat_par_annee(filo_merged, colonne_trace)
+data_loc <- table_RD_for_plot
+trace_var_annee(data_loc, colonne_trace, label_colonne_trace, titre_save, titre, label_color)
+model <- lm(value ~ annee, data = table_RD_for_plot[beneficiaire == 'Differences'])
+summary(model)
+
+############### On généralise ===> A terminer...
+
+
+liste_var <- c('DEC_NBMENFISC', 'DEC_PIMP', 'DEC_TP60',
+               'DEC_D1', 'DEC_D2', 'DEC_D3', 'DEC_D4', 'DEC_MED', 'DEC_D6', 'DEC_D7',
+               'DEC_D8', 'DEC_D9',  'DEC_RD', 'DEC_PRA', 'DEC_PCHO', 'DEC_PPEN', 'DEC_PAUT')
+
+colonne_trace <- "DEC_PAUT" 
 
 table_RD <- data.table("beneficiaire" = c(0, 1))
 for(annee in 2012:2020){
   colonne <- paste(colonne_trace, substr(as.character(annee), 3, 4), sep = '')
   sous_dt <- filo_merged[, mean(get(colonne), na.rm = TRUE), by = beneficiaire]
   setnames(sous_dt, 'V1', colonne)
-  # difference <- diff(eval(paste("sous_dt$",colonne, sep = "")))
-  # new_row    <- data.table("beneficiaire" = 'Diff', colonne = difference)
-  # sous_dt <- rbindlist(list(sous_dt, new_row)) 
-
   table_RD <- merge(table_RD, sous_dt, 'beneficiaire')
 }
-
-table_RD
-
-# On ajoute l'écart entre les deux lignes
 diff <- as.data.table(lapply(table_RD, diff, lag = 1))
 diff$beneficiaire <- "diff"
 table_RD <- rbindlist(list(table_RD, diff)) 
 
 
 table_RD_for_plot <- melt(data = table_RD, 
-                               id.vars = "beneficiaire",
-                               measure.vars  = names(table_RD)[names(table_RD) %like% colonne_trace],
-                               variable.name = "variable",
-                               value.name    = "value"
-                          )
+                          id.vars = "beneficiaire",
+                          measure.vars  = names(table_RD)[names(table_RD) %like% colonne_trace],
+                          variable.name = "variable",
+                          value.name    = "value"
+)
 
 table_RD_for_plot$variable <- as.character(table_RD_for_plot$variable)
 table_RD_for_plot$annee <- as.numeric(substr(table_RD_for_plot$variable, nchar(table_RD_for_plot$variable[1]) - 2 + 1, nchar(table_RD_for_plot$variable[1]))) # On récupère l'année en nombre
-
-# 
-# table_RD_for_plot$annee <- as.numeric(substr(table_RD_for_plot$variable, -2, -1))
-# 
-# table_RD_for_plot$beneficiaire <- as.factor(table_RD_for_plot$beneficiaire)
-
 model <- lm(value ~ annee, data = table_RD_for_plot[beneficiaire == 'diff'])
 summary(model)
-
-ggplot(table_RD_for_plot, aes(x = annee, y = value, color = beneficiaire)) +
-  geom_point() +
-  scale_colour_discrete() + 
-  labs(
-    x = "Année", 
-    y = "Valeur de l'indice",
-    color = "Type d'IRIS"
-  ) +
-  geom_smooth(method = "lm", se=FALSE)
