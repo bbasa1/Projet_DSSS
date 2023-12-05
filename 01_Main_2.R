@@ -2,7 +2,9 @@
 ##### Le principal programme du projet DSSS ####################################
 ################################################################################
 # Le dossier général
-repgen <- "C:/Users/Benjamin/Desktop/Ensae/3A-M2/Projet_DSSS" # Benjamin
+
+# repgen <- "C:/Users/Benjamin/Desktop/Ensae/3A-M2/Projet_DSSS" # Benjamin
+repgen <- "~/Desktop/R/Projet_DSSS" # Tanguy
 
 
 # Les sous-dossiers
@@ -37,7 +39,7 @@ source(paste(repo_prgm , "02_Traces_graphiques.R" , sep = "/"))
 # as.data.table(read.table(paste(repo_data, "Filosofi_Annees/BASE_TD_FILO_DEC_IRIS_2020.csv", sep = "/"), dec=",", sep=";", header = TRUE, na.strings = c('ns','', 'so', 'nd')))
 
 # Puis les filosofi
-filo_2020 <- as.data.table(read.table(paste(repo_data, "Filosofi_Annees/BASE_TD_FILO_DEC_IRIS_2020.csv", sep = "/"), dec=",", sep=";", header = TRUE, na.strings = c('ns','', 'so', 'nd')))
+filo_2020 <- as.data.table(read.table(paste(repo_data, "Filosofi_Annees/BASE_TD_FILO_DEC_IRIS_2020.csv", sep = "/"), dec=",", sep=";", header = TRUE, na.strings = c('ns', 's', '', 'so', 'nd')))
 filo_2019 <- as.data.table(read.csv(paste(repo_data, "Filosofi_Annees/BASE_TD_FILO_DEC_IRIS_2019.csv", sep = "/"), header = TRUE, sep="," ))
 filo_2018 <- as.data.table(read.csv(paste(repo_data, "Filosofi_Annees/BASE_TD_FILO_DEC_IRIS_2018.csv", sep = "/"), header = TRUE, sep=";" ))
 filo_2017 <- as.data.table(read_excel(path = paste(repo_data, "Filosofi_Annees/BASE_TD_FILO_DEC_IRIS_2017.xlsx", sep = "/"), sheet = 1, skip = 5))
@@ -55,12 +57,11 @@ for(annee in 2012:2020){
 }
 
 
-
-filo_2020$DEC_RD20 <- as.numeric(filo_2020$DEC_RD20)
-liste_col <- filo_2020$DEC_TP6020
-liste_col <- gsub(',','.',liste_col)
-filo_2020$DEC_TP6020 <- liste_col
-filo_2020$DEC_TP6020 <- as.numeric(filo_2020$DEC_TP6020)
+# filo_2020$DEC_RD20 <- as.numeric(filo_2020$DEC_RD20)
+# liste_col <- filo_2020$DEC_TP6020
+# liste_col <- gsub(',','.', filo)
+# filo_2020$DEC_TP6020 <- liste_col
+# filo_2020$DEC_TP6020 <- as.numeric(filo_2020$DEC_TP6020)
 
 
 # Merge des tables
@@ -127,33 +128,49 @@ summary(model)
 
 ############### On généralise ===> A terminer...
 
+# Listes des variables et labels associés
 
-liste_var <- c('DEC_NBMENFISC', 'DEC_PIMP', 'DEC_TP60',
+# Non inclues à chaque année 'DEC_NBMENFISC',
+
+liste_var <- c('DEC_PIMP', 'DEC_TP60',
                'DEC_D1', 'DEC_D2', 'DEC_D3', 'DEC_D4', 'DEC_MED', 'DEC_D6', 'DEC_D7',
-               'DEC_D8', 'DEC_D9',  'DEC_RD', 'DEC_PRA', 'DEC_PCHO', 'DEC_PPEN', 'DEC_PAUT')
+               'DEC_D8', 'DEC_D9',  'DEC_RD', 'DEC_PCHO', 'DEC_PPEN', 'DEC_PAUT') # 'DEC_PRA' présente dans 2012 seulement
 
-colonne_trace <- "DEC_PAUT" 
+liste_label_var = c('Part des ménages fiscaux imposés (%)', 
+                    'Taux de bas revenus déclarés au seuil de 60 % du revenu déclaré par unité de consommation médian métropolitain (%)',
+                    '1er décile du revenu déclaré par unité de consommation (en euros)',
+                    '2e décile du revenu déclaré par unité de consommation (en euros)',
+                    '3e décile du revenu déclaré par unité de consommation (en euros)',
+                    '4e décile du revenu déclaré par unité de consommation (en euros)',
+                    'Médiane du revenu déclaré par unité de consommation (en euros)',
+                    '6e décile du revenu déclaré par unité de consommation (en euros)',
+                    '7e décile du revenu déclaré par unité de consommation (en euros)',
+                    '8e décile du revenu déclaré par unité de consommation (en euros)',
+                    '9e décile du revenu déclaré par unité de consommation (en euros)',
+                    'Rapport interdécile D9/D1 du revenu déclaré par unité de consommation',
+                    "Part des indemnités de chômage (%)",
+                    "Part des pensions, retraites et rentes (%)",
+                    "Part des autres revenus (essentiellement des revenus du patrimoine) (%)")
+                    # "Part des revenus d'activités (salariées et non salariées), hors indemnités de chômage (%)" présente dans 2012 seulement
 
-table_RD <- data.table("beneficiaire" = c(0, 1))
-for(annee in 2012:2020){
-  colonne <- paste(colonne_trace, substr(as.character(annee), 3, 4), sep = '')
-  sous_dt <- filo_merged[, mean(get(colonne), na.rm = TRUE), by = beneficiaire]
-  setnames(sous_dt, 'V1', colonne)
-  table_RD <- merge(table_RD, sous_dt, 'beneficiaire')
+
+for (i in 1:length(liste_var)){
+  colonne_trace <- liste_var[i]
+  label_colonne_trace <- liste_label_var[i]
+
+  titre_save <- paste(repo_sorties, "/Trace_", colonne_trace,"_IRIS.pdf", sep = "")
+  label_color <- "IRIS bénéficiaires\ndu GPE"
+  titre <- paste(label_colonne_trace, "\nen fonction des années, pour les IRIS bénéficiaires et non bénéficiaires du GPE")
+  table_RD_for_plot <- preparation_table_stat_par_annee(filo_merged, colonne_trace)
+  data_loc <- table_RD_for_plot
+  trace_var_annee(data_loc, colonne_trace, label_colonne_trace, titre_save, titre, label_color)
+  
+  model <- lm(value ~ annee, data = table_RD_for_plot[beneficiaire == 'Differences'])
+  sink(paste(repo_sorties, "/lm_", colonne_trace,".txt", sep = ''))
+  print(summary(model))
+  sink()
 }
-diff <- as.data.table(lapply(table_RD, diff, lag = 1))
-diff$beneficiaire <- "diff"
-table_RD <- rbindlist(list(table_RD, diff)) 
 
 
-table_RD_for_plot <- melt(data = table_RD, 
-                          id.vars = "beneficiaire",
-                          measure.vars  = names(table_RD)[names(table_RD) %like% colonne_trace],
-                          variable.name = "variable",
-                          value.name    = "value"
-)
-
-table_RD_for_plot$variable <- as.character(table_RD_for_plot$variable)
-table_RD_for_plot$annee <- as.numeric(substr(table_RD_for_plot$variable, nchar(table_RD_for_plot$variable[1]) - 2 + 1, nchar(table_RD_for_plot$variable[1]))) # On récupère l'année en nombre
-model <- lm(value ~ annee, data = table_RD_for_plot[beneficiaire == 'diff'])
-summary(model)
+# model <- lm(value ~ annee, data = table_RD_for_plot[beneficiaire == 'diff'])
+# summary(model)
