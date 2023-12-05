@@ -129,12 +129,11 @@ summary(model)
 ############### On généralise ===> A terminer...
 
 # Listes des variables et labels associés
-
-# Non inclues à chaque année 'DEC_NBMENFISC',
+# Non inclues à chaque année 'DEC_NBMENFISC', 'DEC_PRA' 
 
 liste_var <- c('DEC_PIMP', 'DEC_TP60',
                'DEC_D1', 'DEC_D2', 'DEC_D3', 'DEC_D4', 'DEC_MED', 'DEC_D6', 'DEC_D7',
-               'DEC_D8', 'DEC_D9',  'DEC_RD', 'DEC_PCHO', 'DEC_PPEN', 'DEC_PAUT') # 'DEC_PRA' présente dans 2012 seulement
+               'DEC_D8', 'DEC_D9',  'DEC_RD', 'DEC_PCHO', 'DEC_PPEN', 'DEC_PAUT') 
 
 liste_label_var = c('Part des ménages fiscaux imposés (%)', 
                     'Taux de bas revenus déclarés au seuil de 60 % du revenu déclaré par unité de consommation médian métropolitain (%)',
@@ -151,20 +150,19 @@ liste_label_var = c('Part des ménages fiscaux imposés (%)',
                     "Part des indemnités de chômage (%)",
                     "Part des pensions, retraites et rentes (%)",
                     "Part des autres revenus (essentiellement des revenus du patrimoine) (%)")
-                    # "Part des revenus d'activités (salariées et non salariées), hors indemnités de chômage (%)" présente dans 2012 seulement
 
 
 for (i in 1:length(liste_var)){
   colonne_trace <- liste_var[i]
   label_colonne_trace <- liste_label_var[i]
-
+  # Tracé du graphe : évolution de la variable dans le temps, fichier enregistré
   titre_save <- paste(repo_sorties, "/Trace_", colonne_trace,"_IRIS.pdf", sep = "")
   label_color <- "IRIS bénéficiaires\ndu GPE"
   titre <- paste(label_colonne_trace, "\nen fonction des années, pour les IRIS bénéficiaires et non bénéficiaires du GPE")
   table_RD_for_plot <- preparation_table_stat_par_annee(filo_merged, colonne_trace)
   data_loc <- table_RD_for_plot
   trace_var_annee(data_loc, colonne_trace, label_colonne_trace, titre_save, titre, label_color)
-  
+  # Régression des différences sur le temps, summary enregistré en format .txt
   model <- lm(value ~ annee, data = table_RD_for_plot[beneficiaire == 'Differences'])
   sink(paste(repo_sorties, "/lm_", colonne_trace,".txt", sep = ''))
   print(summary(model))
