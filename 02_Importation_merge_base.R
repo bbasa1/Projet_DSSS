@@ -38,14 +38,17 @@ for(annee in 2012:2020){
   pop_loc <- pop_loc[substr(as.character(IRIS), 1, 2) %in% liste_dep_idf]
 
   txt <- paste("pop_loc <- pop_loc[, .(IRIS, P", substr(as.character(annee), 3, 4), "_POP)]", sep = "") # Si on veut rajouter d'autres renseignements démo on pourra le faire là ensuite
-  eval(parse(text = txt)) 
-  
-    
+  eval(parse(text = txt))
+
+  pop_loc$IRIS <- as.numeric(pop_loc$IRIS)
+  filo_loc$IRIS <- as.numeric(filo_loc$IRIS)
   filo_loc_merged <- merge(filo_loc, pop_loc, by = 'IRIS')
 
   txt <- paste("filo_",annee, "<- filo_loc_merged", sep = "")
   eval(parse(text = txt)) # On remet filo modifié
 }
+
+
 
 ##### ETAPE 2 = Merge des tables en partant de 2020 et en retournant vers le passé ####
 
@@ -63,6 +66,7 @@ liste_longeurs_merged <- nrow(filo_merged) # Le nombre de ligne dans la table me
 liste_longeurs_filo_annee <- nrow(filo_merged) # Le nombre d'IRIS par année 
 
 for(annee in 2019:2012){
+
   txt <- paste("filo_loc <- filo_", annee, sep = "")
   eval(parse(text = txt)) # On peut travailler avec filo_loc dans la boucle
   
@@ -77,7 +81,7 @@ for(annee in 2019:2012){
   
   
   filo_merged_2 <- merge(filo_merged, filo_loc, all = TRUE, by = 'IRIS')
-  try(filo_merged_2 <- merge(filo_merged, filo_loc, all = TRUE, by = c('IRIS', 'LIBIRIS', 'COM', 'LIBCOM')), silent = TRUE) # Pour certaines années il faut merge sur tout ça 
+  try(filo_merged_2 <- merge(filo_merged, filo_loc, all = TRUE, by = c('IRIS', 'LIBIRIS', 'COM', 'LIBCOM')), silent = TRUE) # Pour certaines années il faut merge sur tout ça
   
   filo_merged <- copy(filo_merged_2) # On re-met dedans au cas où on est rentré dans le try
   

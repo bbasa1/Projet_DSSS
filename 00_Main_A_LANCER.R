@@ -20,7 +20,7 @@ source(paste(repo_prgm , "03_Traces_graphiques.R" , sep = "/"))
 
 pourcentage_NAN_max <- 0 # Au délà on vire l'IRIS car on considère qu'on en fera rien 
 
-# On importe les tables
+# On importe les tables, peut être un peu long
 source(paste(repo_prgm , "02_Importation_merge_base.R" , sep = "/"))
 
 
