@@ -1,3 +1,9 @@
+################################################################################
+################################################################################
+#### CE SCRIPT SERT A PREPARER LA BASE DE TRAVAIL, PUIS A FAIRE LES TRACER #####
+################################################################################
+################################################################################
+
 preparation_table_stat_par_annee <- function(data_loc, colonne_trace){
   # Prépare la table pour faire une stat des comparative entre IRIS bénéficiaires et communes non bénéficiaires du GPE
   # En entrée filo_merged

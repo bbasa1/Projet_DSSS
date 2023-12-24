@@ -3,8 +3,8 @@
 ################################################################################
 # Le dossier général
 
-# repgen <- "C:/Users/Benjamin/Desktop/Ensae/3A-M2/Projet_DSSS" # Benjamin
-repgen <- "~/Desktop/R/Projet_DSSS" # Tanguy
+repgen <- "C:/Users/Benjamin/Desktop/Ensae/3A-M2/Projet_DSSS" # Benjamin
+# repgen <- "~/Desktop/R/Projet_DSSS" # Tanguy
 
 
 # Les sous-dossiers
@@ -13,81 +13,62 @@ repo_sorties <- paste(repgen, "Sorties" , sep = "/")
 repo_data <- paste(repgen, "Data" , sep = "/")
 repo_inter <- paste(repgen, "Bases_intermediaires" , sep = "/")
 
-# On commence par importer les packages
+# On commence par importer les packages et les sous-programmes composés uniquement de fnts
 source(paste(repo_prgm , "01_packages.R" , sep = "/"))
-source(paste(repo_prgm , "02_Traces_graphiques.R" , sep = "/"))
+source(paste(repo_prgm , "03_Traces_graphiques.R" , sep = "/"))
+
+
+pourcentage_NAN_max <- 50 # Au délà on vire l'IRIS car on considère qu'on en fera rien 
+
+# On importe les tables
+source(paste(repo_prgm , "02_Importation_merge_base.R" , sep = "/"))
 
 
 
-# read.csv(paste(repo_data, "Filosofi_Annees/BASE_TD_FILO_DEC_IRIS_2020.csv", sep = "/"), header = TRUE, sep=";", dec = ",")
+filo_merged
+
+liste_longeurs_merged
+liste_longeurs_filo_annee
+nrow(filo_merged)
+
+###### Gestion des IRIS modifiés :
+# Chaque fichier de modif est sur les 5 dernières années, nous on a 2012 ==> 2020 donc 8 ans ==> Il en faut 2
+filo_modif_16_20 <- as.data.table(read_excel(path = paste(repo_data, "Suivi_IRIS_Annees/reference_IRIS_geo2020.xlsx", sep = "/"), sheet = 3, skip = 5))
+filo_modif_16_20 <- filo_modif_16_20[substr(as.character(IRIS_INI), 1, 2) %in% liste_dep_idf]
+filo_modif_12_16 <- as.data.table(read_excel(path = paste(repo_data, "Suivi_IRIS_Annees/reference_IRIS_geo2016.xls", sep = "/"), sheet = 3, skip = 5))
+filo_modif_12_16 <- filo_modif_12_16[substr(as.character(IRIS_INI), 1, 2) %in% liste_dep_idf]
+
+# On cacatène
+setnames(filo_modif_16_20, "annee_modif", "ANNEE_MODIF")
+filo_modif <- rbind(filo_modif_16_20, filo_modif_12_16)
+
+filo_merged[IRIS %in% filo_modif$IRIS_FIN]$IRIS
+filo_merged[IRIS %in% filo_modif$IRIS_INI]$IRIS
+
+
+# filo_2020
+# filo_modif[ANNEE_MODIF == 2020]$IRIS_FIN
+# filo_2020_modif <- copy(filo_2020)
+# liste_iris_modif <- filo_modif[ANNEE_MODIF == 2020]$IRIS_FIN
 # 
-# fread(paste(repo_data, "Filosofi_Annees/BASE_TD_FILO_DEC_IRIS_2020.csv", sep = "/"), sep = ";", dec = ",")
+# 
+# filo_2020_modif[IRIS %in% liste_iris_modif, IRIS := sapply(new_to_old_iris(IRIS, filo_modif[ANNEE_MODIF == 2020]))]
 # 
 # 
-# # # DF$b = 
-# # 
-# as.numeric(gsub(',','.',filo_2020$DEC_PAUT20))
+# dt_iris_modif <- filo_modif[ANNEE_MODIF == 2020]
+# new_to_old_iris <- function(old_iris){return(dt_iris_modif[IRIS_FIN == old_iris]$IRIS_INI)}
 # 
-# as.data.table(read_excel(path = paste(repo_data, "Filosofi_Annees/BASE_TD_FILO_DEC_IRIS_2020.csv", sep = "/"), sheet = 1, skip = 5, na.strings = c('ns','', 'so')))
+# filo_2020_modif[IRIS %in% liste_iris_modif,
+#                 IRIS := lapply(IRIS,new_to_old_iris)]
 # 
-# scan(text=filo_2020$DEC_PAUT20, dec=",", sep=".")
+# filo_2020_modif[IRIS %in% liste_iris_modif,
+#                 IRIS_MOD := lapply(.SD, new_to_old_iris),
+#                 .SDcols = c("IRIS")] 
 # 
-# filo_2020 <- as.data.table(read.csv(paste(repo_data, "Filosofi_Annees/BASE_TD_FILO_DEC_IRIS_2020.csv", sep = "/"), header = TRUE, sep=";", dec = ",",  na.strings = c('ns','', 'so', 'nd')))
-# scan(text=DEC_PAUT20, dec=",", sep=".")
+# filo_2020_modif[IRIS %in% liste_iris_modif]
 # 
-# 
-# as.data.table(read.table(paste(repo_data, "Filosofi_Annees/BASE_TD_FILO_DEC_IRIS_2020.csv", sep = "/"), dec=",", sep=";", header = TRUE, na.strings = c('ns','', 'so', 'nd')))
+# new_to_old_iris(940220106)
 
-# Puis les filosofi
-filo_2020 <- as.data.table(read.table(paste(repo_data, "Filosofi_Annees/BASE_TD_FILO_DEC_IRIS_2020.csv", sep = "/"), dec=",", sep=";", header = TRUE, na.strings = c('ns', 's', '', 'so', 'nd')))
-filo_2019 <- as.data.table(read.csv(paste(repo_data, "Filosofi_Annees/BASE_TD_FILO_DEC_IRIS_2019.csv", sep = "/"), header = TRUE, sep="," ))
-filo_2018 <- as.data.table(read.csv(paste(repo_data, "Filosofi_Annees/BASE_TD_FILO_DEC_IRIS_2018.csv", sep = "/"), header = TRUE, sep=";" ))
-filo_2017 <- as.data.table(read_excel(path = paste(repo_data, "Filosofi_Annees/BASE_TD_FILO_DEC_IRIS_2017.xlsx", sep = "/"), sheet = 1, skip = 5))
-filo_2016 <- as.data.table(read_excel(path = paste(repo_data, "Filosofi_Annees/BASE_TD_FILO_DEC_IRIS_2016.xls", sep = "/"), sheet = 1, skip = 5))
-filo_2015 <- as.data.table(read_excel(path = paste(repo_data, "Filosofi_Annees/BASE_TD_FILO_DEC_IRIS_2015.xls", sep = "/"), sheet = 1, skip = 5))
-filo_2014 <- as.data.table(read_excel(path = paste(repo_data, "Filosofi_Annees/BASE_TD_FILO_DEC_IRIS_2014.xls", sep = "/"), sheet = 1, skip = 5))
-filo_2013 <- as.data.table(read_excel(path = paste(repo_data, "Filosofi_Annees/BASE_TD_FILO_DEC_IRIS_2013.xls", sep = "/"), sheet = 1, skip = 5))
-filo_2012 <- as.data.table(read_excel(path = paste(repo_data, "Filosofi_Annees/BASE_TD_FILO_DEC_IRIS_2012.xls", sep = "/"), sheet = 1, skip = 5))
-
-# On filter sur l'IdF
-liste_dep_idf <- c('75', '77', '78', '91', '92', '93', '94')
-for(annee in 2012:2020){
-  txt <- paste("filo_", annee, "<- filo_", annee, "[substr(as.character(IRIS), 1, 2) %in% liste_dep_idf]", sep = "")
-  eval(parse(text = txt))
-}
-
-
-# filo_2020$DEC_RD20 <- as.numeric(filo_2020$DEC_RD20)
-# liste_col <- filo_2020$DEC_TP6020
-# liste_col <- gsub(',','.', filo)
-# filo_2020$DEC_TP6020 <- liste_col
-# filo_2020$DEC_TP6020 <- as.numeric(filo_2020$DEC_TP6020)
-
-
-# Merge des tables
-filo_merged <- copy(filo_2012)
-liste_longeurs <- nrow(filo_2012) # Le nombre de ligne dans la table merged ==> va décroitre avec les années
-liste_longeurs_IRIS <- nrow(filo_2012) # Le nombre d'IRIS au total en IdF
-
-for(annee in 2013:2017){ # On merge sur les plein de colonnes avant 2017
-  txt <- paste("filo_merged <- merge(filo_merged, filo_", annee, ",all = FALSE, by = c('IRIS', 'LIBIRIS', 'COM', 'LIBCOM'))", sep = "")
-  eval(parse(text = txt))
-  liste_longeurs <- append(liste_longeurs,nrow(filo_merged))
-  txt <- paste("liste_longeurs_IRIS <- append(liste_longeurs_IRIS,nrow(filo_", annee, "))", sep = "")
-  eval(parse(text = txt))
-  
-}
-for(annee in 2018:2020){ # Et uniquement sur l'IRIS pour après 2018
-  txt <- paste("filo_merged <- merge(filo_merged, filo_", annee, ",all = FALSE, by = 'IRIS')", sep = "")
-  eval(parse(text = txt))
-  liste_longeurs <- append(liste_longeurs,nrow(filo_merged))
-  txt <- paste("liste_longeurs_IRIS <- append(liste_longeurs_IRIS,nrow(filo_", annee, "))", sep = "")
-  eval(parse(text = txt))
-}
-
-
-liste_longeurs
-liste_longeurs_IRIS
 
 ###### On récupère les IRIS bénéficiaires du GPE
 path_iris <- paste(repo_data, "CONTOURS-IRIS-2020/1_DONNEES_LIVRAISON_2020-12-00282/CONTOURS-IRIS_2-1_SHP_LAMB93_FXX-2020", sep = "/")
