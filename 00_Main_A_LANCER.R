@@ -18,7 +18,7 @@ source(paste(repo_prgm , "01_packages.R" , sep = "/"))
 source(paste(repo_prgm , "03_Traces_graphiques.R" , sep = "/"))
 
 
-pourcentage_NAN_max <- 50 # Au délà on vire l'IRIS car on considère qu'on en fera rien 
+pourcentage_NAN_max <- 0 # Au délà on vire l'IRIS car on considère qu'on en fera rien 
 
 # On importe les tables
 source(paste(repo_prgm , "02_Importation_merge_base.R" , sep = "/"))
@@ -42,9 +42,44 @@ filo_modif_12_16 <- filo_modif_12_16[substr(as.character(IRIS_INI), 1, 2) %in% l
 setnames(filo_modif_16_20, "annee_modif", "ANNEE_MODIF")
 filo_modif <- rbind(filo_modif_16_20, filo_modif_12_16)
 
+####### IDEE DE BASE : Si un IRIS est traité ET se trouve dans la base filo_modif, alors tous les autres IRIS en contact avec lui dans filo_modif seront considérés comme traités
+
+filo_merged[IRIS == 751010101]$P20_POP
+
+
 filo_merged[IRIS %in% filo_modif$IRIS_FIN]$IRIS
 filo_merged[IRIS %in% filo_modif$IRIS_INI]$IRIS
 
+
+filo_modif_reelles[IRIS_FIN %in% filo_modif_reelles$IRIS_INI] # Aucune double chaine/IRIS deux fois modifié OUF
+
+filo_merged[IRIS == 940220104] # ANCIEN IRIS
+filo_merged[IRIS == 940220113] # NOUVEL IRIS
+filo_merged[IRIS == 940220114] # NOUVEL IRIS 2
+filo_merged[IRIS == 940220106] # Aie
+
+filo_merged[IRIS == 940220104, DEC_PIMP20 := sum(DEC_PIMP20*P20_POP)]
+filo_merged_INI <- filo_merged[IRIS == 940220104]
+filo_merged_FIN <- filo_merged[IRIS %in% c(940220113, 940220114)]
+filo_merged_FIN <- merge(filo_merged_FIN, Base_pop, by = 'IRIS')
+
+
+Base_pop[IRIS == 940220106]$P20_POP
+
+
+filo_merged_INI$DEC_PIMP20 <- sum(filo_merged_FIN$DEC_PIMP20 * filo_merged_FIN$P20_POP)/sum(filo_merged_FIN$P20_POP)
+
+940220113
+
+filo_modif[IRIS_INI %in% c(940220106, 940220104) | IRIS_FIN %in% c(940220106, 940220104)]
+
+# La population en 2020
+Base_pop <- as.data.table(read_excel(path = paste(repo_data, "base-ic-evol-struct-pop-2020.xlsx", sep = "/"), sheet = 1, skip = 5))
+Base_pop <- Base_pop[substr(as.character(IRIS), 1, 2) %in% liste_dep_idf]
+
+Base_pop[IRIS == 940220106]$P20_POP
+
+filo_modif[IRIS_FIN == 940220106 | IRIS_INI == 940220106]
 
 # filo_2020
 # filo_modif[ANNEE_MODIF == 2020]$IRIS_FIN
