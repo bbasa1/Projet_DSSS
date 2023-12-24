@@ -79,9 +79,13 @@ for(annee in 2019:2012){
   filo_loc[,Prct_NAN:=NULL]
   filo_loc[,NB_nan:=NULL]
   
+  if(annee %in% 2016:2012){
+    filo_merged_2 <- merge(filo_merged, filo_loc, all = TRUE, by = c('IRIS', 'LIBIRIS', 'COM', 'LIBCOM'))
+  }else{
+    filo_merged_2 <- merge(filo_merged, filo_loc, all = TRUE, by = 'IRIS')
+  }
   
-  filo_merged_2 <- merge(filo_merged, filo_loc, all = TRUE, by = 'IRIS')
-  try(filo_merged_2 <- merge(filo_merged, filo_loc, all = TRUE, by = c('IRIS', 'LIBIRIS', 'COM', 'LIBCOM')), silent = TRUE) # Pour certaines années il faut merge sur tout ça
+  # try(filo_merged_2 <- merge(filo_merged, filo_loc, all = TRUE, by = c('IRIS', 'LIBIRIS', 'COM', 'LIBCOM')), silent = TRUE) # Pour certaines années il faut merge sur tout ça
   
   filo_merged <- copy(filo_merged_2) # On re-met dedans au cas où on est rentré dans le try
   
