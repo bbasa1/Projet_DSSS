@@ -3,8 +3,8 @@
 ################################################################################
 # Le dossier général
 
-repgen <- "C:/Users/Benjamin/Desktop/Ensae/3A-M2/Projet_DSSS" # Benjamin
-# repgen <- "~/Desktop/R/Projet_DSSS" # Tanguy
+#repgen <- "C:/Users/Benjamin/Desktop/Ensae/3A-M2/Projet_DSSS" # Benjamin
+repgen <- "~/Desktop/R/Projet_DSSS" # Tanguy
 
 
 # Les sous-dossiers
@@ -31,7 +31,8 @@ liste_longeurs_filo_annee # Le nombre d'IRIS par année en IdF dans filosofi 201
 # Il faudrait lancer le script 03 ici pour gérer les IRIS modifiés/Créés/supprimés ==> Script à terminer
 # source(paste(repo_prgm , "03_Gestion_IRIS_modifs_par_annee.R" , sep = "/"))
 
-# On assigne la variable de traitement
+# On assigne la variable de traitement, rayon pour traitement des IRIS dans un certain rayon autour des gares GPE
+rayon = TRUE
 source(paste(repo_prgm , "04_IRIS_Traites_et_temoins.R" , sep = "/"))
 
 # Petites stats des pour commencer : 
@@ -98,7 +99,7 @@ liste_label_var = c('Part des ménages fiscaux imposés (%)',
                     "Part des pensions, retraites et rentes (%)",
                     "Part des autres revenus (essentiellement des revenus du patrimoine) (%)")
 
-
+if(!rayon){
 for (i in 1:length(liste_var)){
   colonne_trace <- liste_var[i]
   label_colonne_trace <- liste_label_var[i]
@@ -113,9 +114,27 @@ for (i in 1:length(liste_var)){
   model <- lm(value ~ annee, data = table_RD_for_plot[beneficiaire == 'Differences'])
   sink(paste(repo_sorties, "/lm_", colonne_trace,".txt", sep = ''))
   print(summary(model))
-  sink()
+  sink()}
 }
 
 
+## Avec un rayon autour des gares comme traitement
+if(rayon){
+for (i in 1:length(liste_var)){
+  colonne_trace <- liste_var[i]
+  label_colonne_trace <- liste_label_var[i]
+  # Tracé du graphe : évolution de la variable dans le temps, fichier enregistré
+  titre_save <- paste(repo_sorties, "/Trace_", colonne_trace,"_IRIS_rayon.pdf", sep = "")
+  label_color <- "IRIS bénéficiaires\ndu GPE (rayon)"
+  titre <- paste(label_colonne_trace, "\nen fonction des années, pour les IRIS bénéficiaires et non bénéficiaires du GPE")
+  table_RD_for_plot <- preparation_table_stat_par_annee(filo_merged, colonne_trace)
+  data_loc <- table_RD_for_plot
+  trace_var_annee(data_loc, colonne_trace, label_colonne_trace, titre_save, titre, label_color)
+  # Régression des différences sur le temps, summary enregistré en format .txt
+  model <- lm(value ~ annee, data = table_RD_for_plot[beneficiaire == 'Differences'])
+  sink(paste(repo_sorties, "/lm_rayon", colonne_trace,".txt", sep = ''))
+  print(summary(model))
+  sink()}
+}
 # model <- lm(value ~ annee, data = table_RD_for_plot[beneficiaire == 'diff'])
 # summary(model)
