@@ -3,8 +3,8 @@
 ################################################################################
 # Le dossier général
 
-#repgen <- "C:/Users/Benjamin/Desktop/Ensae/3A-M2/Projet_DSSS" # Benjamin
-repgen <- "~/Desktop/R/Projet_DSSS" # Tanguy
+repgen <- "C:/Users/Benjamin/Desktop/Ensae/3A-M2/Projet_DSSS" # Benjamin
+# repgen <- "~/Desktop/R/Projet_DSSS" # Tanguy
 
 
 # Les sous-dossiers
@@ -49,12 +49,35 @@ nrow(filo_merged)
 
 
 ######### Petite régression : est-ce que le traitement est signific pour expliquer l'évolution ?
-liste_cols <- names(filo_merged)[names(filo_merged) %like% "DEC_TP60"]
+# liste_cols <- names(filo_merged)[names(filo_merged) %like% "DEC_TP60"]
+dt_recap_loc <- data.table(Estimate = numeric(),
+                       pvalue = numeric(),
+                       variable = character())
 
-filo_merged[, Evolution := DEC_D920 - DEC_D912]
-model <- lm(Evolution ~ beneficiaire, data = filo_merged[TYP_IRIS_20 == 'H'], weights = P20_POP, na.action=na.exclude)
-summary(model)
+liste_var_reg <- c("DEC_TP60", "DEC_Q1", "DEC_MED", "DEC_Q3", "DEC_EQ",
+                   "DEC_D1", "DEC_D2", "DEC_D3", "DEC_D4", "DEC_D5", "DEC_D6", "DEC_D7", "DEC_D8", "DEC_D9",
+                   "DEC_RD", "DEC_S80S20", "DEC_GI", "DEC_PACT", "DEC_PTSA", "DEC_PCHO", "DEC_PBEN", "DEC_PPEN", "DEC_PAUT")
 
+liste_var_reg <- c("DEC_TP60", "DEC_MED",
+                   "DEC_D1", "DEC_D2", "DEC_D3", "DEC_D4", "DEC_D6", "DEC_D7", "DEC_D8", "DEC_D9",
+                   "DEC_RD", "DEC_PCHO", "DEC_PPEN", "DEC_PAUT")
+
+
+for(var in liste_var_reg){
+  
+  var_20 <- paste(var, "20", sep = "")
+  var_12 <- paste(var, "12", sep = "")
+  
+  filo_merged[, Evolution := get(var_20) - get(var_12)]
+  model <- lm(Evolution ~ beneficiaire, data = filo_merged[TYP_IRIS_20 == 'H'], weights = P20_POP, na.action=na.exclude)
+  df_loc <- as.data.table(summary(model)$coefficients)[2,]
+  setnames(df_loc, "Pr(>|t|)", "pvalue")
+  df_loc$variable <- var
+  l <- c("Estimate", "pvalue", "variable")
+  dt_recap_loc <- rbindlist(list(dt_recap_loc, df_loc[,..l]), fill=TRUE)
+}
+
+dt_recap_loc[pvalue <= 0.1]
 
 ########## Puis les stats des à compléter.... ##########
 

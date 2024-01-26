@@ -69,3 +69,50 @@ unzip("Suivi_IRIS_Annees/reference_IRIS_geo2016.zip",
 # download.file(url = "https://data.statistiques.developpement-durable.gouv.fr/dido/api/v1/datafiles/f8f0700f-806c-40a7-83b1-f21cf507e7c4/csv?millesime=2023-11&withColumnName=true&withColumnDescription=true&withColumnUnit=false",
 #               destfile = "Sitadel/Sitadel_locaux.csv")
 
+
+### Populations des IRIS
+download.file(url = "https://www.insee.fr/fr/statistiques/fichier/7704076/base-ic-evol-struct-pop-2020_xlsx.zip",
+              destfile = "Population_Annees/Pop_IRIS_2020.zip")
+unzip("Population_Annees/Pop_IRIS_2020.zip", 
+      exdir = "Population_Annees"
+)
+download.file(url = "https://www.insee.fr/fr/statistiques/fichier/6543200/base-ic-evol-struct-pop-2019.zip",
+              destfile = "Population_Annees/Pop_IRIS_2019.zip")
+unzip("Population_Annees/Pop_IRIS_2019.zip", 
+      exdir = "Population_Annees"
+)
+download.file(url = "https://www.insee.fr/fr/statistiques/fichier/5650720/base-ic-evol-struct-pop-2018.zip",
+              destfile = "Population_Annees/Pop_IRIS_2018.zip")
+unzip("Population_Annees/Pop_IRIS_2018.zip", 
+      exdir = "Population_Annees"
+)
+download.file(url = "https://www.insee.fr/fr/statistiques/fichier/4799309/base-ic-evol-struct-pop-2017.zip",
+              destfile = "Population_Annees/Pop_IRIS_2017.zip")
+unzip("Population_Annees/Pop_IRIS_2017.zip", 
+      exdir = "Population_Annees"
+)
+download.file(url = "https://www.insee.fr/fr/statistiques/fichier/4228434/base-ic-evol-struct-pop-2016.zip",
+              destfile = "Population_Annees/Pop_IRIS_2016.zip")
+unzip("Population_Annees/Pop_IRIS_2016.zip", 
+      exdir = "Population_Annees"
+)
+download.file(url = "https://www.insee.fr/fr/statistiques/fichier/3627376/base-ic-evol-struct-pop-2015.zip",
+              destfile = "Population_Annees/Pop_IRIS_2015.zip")
+unzip("Population_Annees/Pop_IRIS_2015.zip", 
+      exdir = "Population_Annees"
+)
+download.file(url = "https://www.insee.fr/fr/statistiques/fichier/3137409/base-ic-evol-struct-pop-2014.zip",
+              destfile = "Population_Annees/Pop_IRIS_2014.zip")
+unzip("Population_Annees/Pop_IRIS_2014.zip", 
+      exdir = "Population_Annees"
+)
+download.file(url = "https://www.insee.fr/fr/statistiques/fichier/2386737/base-ic-evol-struct-pop-2013.zip",
+              destfile = "Population_Annees/Pop_IRIS_2013.zip")
+unzip("Population_Annees/Pop_IRIS_2013.zip", 
+      exdir = "Population_Annees"
+)
+download.file(url = "https://www.insee.fr/fr/statistiques/fichier/2028582/infra-population-2012.zip",
+              destfile = "Population_Annees/Pop_IRIS_2012.zip")
+unzip("Population_Annees/Pop_IRIS_2012.zip", 
+      exdir = "Population_Annees"
+)
