@@ -53,3 +53,22 @@ trace_var_annee <- function(data_loc, colonne_trace, label_colonne_trace, titre_
   ggsave(titre_save, p ,  width = 297, height = 210, units = "mm")
   print(p)
 }
+
+
+trace_pval_BH <- function(data_loc, alpha, titre_save, titre, scale_y = "identity"){
+  # Fait le tracé des pvalues et leur significativité au sens de la procédure de BH
+  p <- ggplot(data_loc) +
+    geom_point(aes(x = ordre_pval, y = pvalue, color = signif_BH), size = 8) +
+    geom_line(aes(x = ordre_pval, y = alpha*ordre_pval/nrow(data_loc))) +
+    labs(
+      x = " ", 
+      y = "pvalue",
+      color = paste("Significatif à ", 100*alpha, "% \n(au sens BH)", sep = ""),
+      title = titre
+    ) +
+    scale_y_continuous(trans=scale_y) +
+    theme(text = element_text(size = 25))
+  
+  ggsave(titre_save, p ,  width = 297, height = 210, units = "mm")
+  print(p)
+}

@@ -44,3 +44,17 @@ Faire_regression_evolution_traitement <- function(data_loc, liste_var_reg_12_20,
   dt_recap_loc[is.na(Annees), Annees := "2013 - 2020"]
   return(dt_recap_loc)
 }
+
+
+
+Ajout_pval_BH <- function(data_loc, alpha){
+  # Cette fonction calcule les pvalue corrigées au sens de la procédure de Benjamini-Hochberg 
+  
+  data_loc <- data_loc[order(pvalue)] # On trie
+  data_loc$ordre_pval <- 1:nrow(data_loc) 
+  data_loc$facteur_BH <- nrow(data_loc)/data_loc$ordre_pval # On met une colonne facteur
+  data_loc$pval_BH <- data_loc$facteur_BH * data_loc$pval # On calcule la pval corrigée
+  data_loc$signif_BH <- FALSE
+  data_loc[pval_BH <= alpha, signif_BH := TRUE]
+  return(data_loc)
+}

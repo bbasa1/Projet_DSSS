@@ -8,7 +8,7 @@
 
 repgen <- "C:/Users/Benjamin/Desktop/Ensae/3A-M2/Projet_DSSS" # Benjamin
 # repgen <- "~/Desktop/R/Projet_DSSS" # Tanguy
-utiliser_filo_merged_sauvegardee <- FALSE # FALSE pour créer la base, TRUE pour charger filo_merged déjà créée (pour gagner du temps si on relance le prbm)
+utiliser_filo_merged_sauvegardee <- TRUE # FALSE pour créer la base, TRUE pour charger filo_merged déjà créée (pour gagner du temps si on relance le prbm)
 
 dist_rayon <- 500 # Rayon = 500m vol d'oiseau
 rayon = TRUE
@@ -27,7 +27,6 @@ source(paste(repo_prgm , "06_Econometrie.R" , sep = "/"))
 ################################################################################
 #### CREATION ET IMPORT DE BASES ===============================================
 ################################################################################
-
 # Importation ou création de la base des IRIS : filo_merged
 if(! utiliser_filo_merged_sauvegardee){
   source(paste(repo_prgm , "02_Importation_merge_base.R" , sep = "/"))
@@ -47,8 +46,8 @@ source(paste(repo_prgm , "04_IRIS_Traites_et_temoins.R" , sep = "/"))
 table(filo_merged$beneficiaire) # On a 67 IRIS bénéficiaires pour 69 gares
 length(unique(liste_IRIS_beneficiaires)) # Mais en fait deux IRIS sont en doublons (et ont 2 gares)
 filo_merged # La tête de la base
-liste_longeurs_merged # La longueur de la base merged 2012 --> 2020
-liste_longeurs_filo_annee # Le nombre d'IRIS par année en IdF dans filosofi 2012 --> 2020
+# liste_longeurs_merged # La longueur de la base merged 2012 --> 2020
+# liste_longeurs_filo_annee # Le nombre d'IRIS par année en IdF dans filosofi 2012 --> 2020
 
 
 ################################################################################
@@ -62,16 +61,17 @@ liste_var_reg_12_20 <- c("DEC_TP60", "DEC_MED",
 liste_var_reg_13_20 <- c("DEC_Q1", "DEC_Q3", "DEC_EQ","DEC_S80S20", "DEC_GI", "DEC_PTSA", "DEC_PBEN")
 data_loc <- copy(filo_merged)
 
-dt_recap_loc <- Faire_regression_evolution_traitement(data_loc, liste_var_reg_12_20, liste_var_reg_13_20)
+dt_recap <- Faire_regression_evolution_traitement(data_loc, liste_var_reg_12_20, liste_var_reg_13_20)
   
 
-dt_recap_loc[pvalue <= 0.1]
+alpha <- 0.05
+dt_recap <- Ajout_pval_BH(dt_recap, alpha)
 
-
-
-
-
-
+titre <- "pvalue et significativité\nau sens de la procédure de Benjamini-Hochberg"
+titre_save <- paste(repo_sorties, "Trace_pval_BH.pdf", sep = "/")
+scale_y <- "identity" # identity ou log10 pour l'axe y
+trace_pval_BH(dt_recap, alpha, titre_save, titre, scale_y)
+  
 
 #### BROUILLON EN DESSOUS ##############
 # 
