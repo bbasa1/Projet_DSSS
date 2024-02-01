@@ -71,7 +71,12 @@ titre <- "pvalue et significativité\nau sens de la procédure de Benjamini-Hoch
 titre_save <- paste(repo_sorties, "Trace_pval_BH.pdf", sep = "/")
 scale_y <- "identity" # identity ou log10 pour l'axe y
 trace_pval_BH(dt_recap, alpha, titre_save, titre, scale_y)
-  
+
+# Idem en échelle log
+titre_save <- paste(repo_sorties, "Trace_pval_BH_log.pdf", sep = "/")
+scale_y <- "log10" # identity ou log10 pour l'axe y
+trace_pval_BH(dt_recap, alpha, titre_save, titre, scale_y)
+
 
 #### BROUILLON EN DESSOUS ##############
 # 
