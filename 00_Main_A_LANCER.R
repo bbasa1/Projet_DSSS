@@ -78,6 +78,8 @@ scale_y <- "log10" # identity ou log10 pour l'axe y
 trace_pval_BH(dt_recap, alpha, titre_save, titre, scale_y)
 
 
+xtable(dt_recap)
+
 #### BROUILLON EN DESSOUS ##############
 # 
 # ########## Puis les stats des à compléter.... ##########
