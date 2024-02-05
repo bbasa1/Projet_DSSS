@@ -12,8 +12,9 @@ map_iris <- st_read(paste(path_iris, "CONTOURS-IRIS.shp", sep = '/'))  %>% st_tr
 path_stations_gpe <- paste(repo_data, 'Gares_GPE', sep = '/')
 map_stations_gpe <- st_read(paste(path_stations_gpe, "GPE_GARE_LOCALISATION.shp", sep = '/')) %>% st_transform(crs = 3035)
 
-#Rayon = 500m vol d'oiseau
 map_stations_gpe_rayon <- st_buffer(map_stations_gpe, dist_rayon)
+
+# Identification des IRIS à traiter
 
 liste_coordonnees_stations <- map_stations_gpe$geometry
 
@@ -29,7 +30,6 @@ liste_IRIS_beneficiaires_rayon <- map_iris[liste_lignes_rayon,]$CODE_IRIS
 
 
 ######## On assigne la variable de traitement
-
 
 filo_merged[, beneficiaire := 0]
 
