@@ -59,13 +59,14 @@ liste_var_reg_12_20 <- c("DEC_TP60", "DEC_MED",
                          "DEC_D1", "DEC_D2", "DEC_D3", "DEC_D4", "DEC_D6", "DEC_D7", "DEC_D8", "DEC_D9",
                          "DEC_RD", "DEC_PCHO", "DEC_PPEN", "DEC_PAUT")
 liste_var_reg_13_20 <- c("DEC_Q1", "DEC_Q3", "DEC_EQ","DEC_S80S20", "DEC_GI", "DEC_PTSA", "DEC_PBEN")
-data_loc <- copy(filo_merged)
 
+data_loc <- copy(filo_merged)
 dt_recap <- Faire_regression_evolution_traitement(data_loc, liste_var_reg_12_20, liste_var_reg_13_20)
   
 
-alpha <- 0.05
-dt_recap <- Ajout_pval_BH(dt_recap, alpha)
+alpha <- 0.1
+data_loc <- copy(dt_recap)
+dt_recap <- Ajout_pval_BH(data_loc, alpha)
 
 titre <- "pvalue et significativité\nau sens de la procédure de Benjamini-Hochberg"
 titre_save <- paste(repo_sorties, "Trace_pval_BH.pdf", sep = "/")
@@ -77,8 +78,40 @@ titre_save <- paste(repo_sorties, "Trace_pval_BH_log.pdf", sep = "/")
 scale_y <- "log10" # identity ou log10 pour l'axe y
 trace_pval_BH(dt_recap, alpha, titre_save, titre, scale_y)
 
+# Pour faire des variables plus compréhensibles dans les sorties
+dt_recap[, variable_label := factor(
+  fcase(
+    variable == "DEC_PPEN", "Part des pensions, retraites et rentes (%)",
+    variable == "DEC_D2", "2e décile (€)",
+    variable == "DEC_D1", "1er décile (€)",
+    variable == "DEC_D3", "3e décile (€)",
+    variable == "DEC_D4", "4e décile (€)",
+    variable == "DEC_PBEN", "Part des revenus d'activités non salariées (%)",
+    variable == "DEC_Q1", "1er quartile(€)",
+    variable == "DEC_PCHO", "Part des indemnités de chômage (%)",
+    variable == "DEC_EQ", "Écart interquartile rapporté à la médiane",
+    variable == "DEC_TP60", "Taux de bas revenus déclarés au seuil de 60 % (%)",
+    variable == "DEC_MED", "Médiane (€)",
+    variable == "DEC_D8", "8e décile (€)",
+    variable == "DEC_GI", "Indice de Gini",
+    variable == "DEC_Q3", "3e quartile(€)",
+    variable == "DEC_D6", "6e décile (€)",
+    variable == "DEC_D7", "7e décile (€)",
+    variable == "DEC_PTSA", "Part des revenus d'activités salariées (%)",
+    variable == "DEC_D9", "9e décile (€)",
+    variable == "DEC_RD", "Rapport interdécile D9/D1",
+    variable == "DEC_S80S20", "S80/S20",
+    variable == "DEC_PAUT", "Part des autres revenus (%)"
+    
+  )
+)
+]
+l <- c("variable_label", "pval_BH", "Estimate")
+xtable(dt_recap[,..l])
+dt_recap[,..l]
 
-xtable(dt_recap)
+l <- c("reconstruit", "DEC_EQ20")
+filo_merged[,..l]
 
 #### BROUILLON EN DESSOUS ##############
 # 
