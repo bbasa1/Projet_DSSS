@@ -24,6 +24,12 @@ source(paste(repo_prgm , "01_packages.R" , sep = "/"))
 source(paste(repo_prgm , "05_Traces_graphiques.R" , sep = "/"))
 source(paste(repo_prgm , "06_Econometrie.R" , sep = "/"))
 
+
+liste_var_reg_12_20 <- c("DEC_MED","DEC_D1", "DEC_D2", "DEC_D3", "DEC_D4", "DEC_D6", "DEC_D7", "DEC_D8", "DEC_D9",
+                         "DEC_RD", "DEC_PCHO", "DEC_PPEN", "DEC_PAUT")
+liste_var_reg_13_20 <- c("DEC_Q1", "DEC_Q3","DEC_S80S20", "DEC_GI", "DEC_PTSA", "DEC_PBEN")
+
+
 ################################################################################
 #### CREATION ET IMPORT DE BASES ===============================================
 ################################################################################
@@ -54,11 +60,6 @@ filo_merged # La tête de la base
 #### ECONOMETRIE ===============================================================
 ################################################################################
 # Régression de évolution des variables socio-éco sur 8 ans par la variable de traitement
-
-liste_var_reg_12_20 <- c("DEC_TP60", "DEC_MED",
-                         "DEC_D1", "DEC_D2", "DEC_D3", "DEC_D4", "DEC_D6", "DEC_D7", "DEC_D8", "DEC_D9",
-                         "DEC_RD", "DEC_PCHO", "DEC_PPEN", "DEC_PAUT")
-liste_var_reg_13_20 <- c("DEC_Q1", "DEC_Q3", "DEC_EQ","DEC_S80S20", "DEC_GI", "DEC_PTSA", "DEC_PBEN")
 
 data_loc <- copy(filo_merged)
 dt_recap <- Faire_regression_evolution_traitement(data_loc, liste_var_reg_12_20, liste_var_reg_13_20)
