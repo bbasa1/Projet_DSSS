@@ -62,7 +62,7 @@ for(annee in 2012:2020){
   
   liste_IRIS_NAN <- filo_loc_merged[is.na(get(nom_col_IRIS_NAN))]$IRIS
   liste_COMM_NAN <- substr(liste_IRIS_NAN, 1, 5)
-  filo_loc_comm <- filo_loc_comm[CODGEO %in% liste_COMM_NAN]
+  filo_loc_comm <- filo_loc_comm[CODGEO %in% liste_COMM_NAN & substr(CODGEO, 1, 2) != "75"] # On ne prend PAS Paris
 
   # On renome qq colonnes pour récupérer les données communes  
   setnames(filo_loc_comm, "RD", paste("RD", substr(annee, 3, 4), sep = ""))
@@ -92,14 +92,6 @@ for(annee in 2012:2020){
   txt <- paste("filo_",annee, "<- filo_loc_merged", sep = "")
   eval(parse(text = txt)) # On remet filo modifié
 }
-
-
-
-# liste_IRIS_NAN <- filo_loc_merged[is.na(get(nom_col_IRIS_NAN))]$IRIS
-# 
-# nom_col_iris <- paste(var, annee, sep = "")
-# nom_col_comm <- substr(nom_col_iris, 5, 1000)
-# filo_loc_merged[IRIS %in% liste_IRIS_NAN, eval(nom_col_iris) := get(nom_col_comm)]
 
 
 

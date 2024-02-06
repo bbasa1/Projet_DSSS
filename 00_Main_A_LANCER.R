@@ -41,8 +41,9 @@ if(! utiliser_filo_merged_sauvegardee){
   load(paste(repo_data, "filo_merged.RData", sep = "/"))
 }
 
-filo_merged[]
-filo_merged[COM.x == "78189" | COM.y == "78189"]
+# filo_merged[]
+# filo_merged[COM.x == "91345" | COM.y == "91345"]
+# table(filo_merged$COM.x == filo_merged$COM.y)
 
 # Il faudrait lancer le script 03 ici pour gérer les IRIS modifiés/Créés/supprimés ==> Script à terminer
 # source(paste(repo_prgm , "03_Gestion_IRIS_modifs_par_annee.R" , sep = "/"))
