@@ -8,9 +8,9 @@
 
 repgen <- "C:/Users/Benjamin/Desktop/Ensae/3A-M2/Projet_DSSS" # Benjamin
 # repgen <- "~/Desktop/R/Projet_DSSS" # Tanguy
-utiliser_filo_merged_sauvegardee <- FALSE # FALSE pour créer la base, TRUE pour charger filo_merged déjà créée (pour gagner du temps si on relance le prbm)
+utiliser_filo_merged_sauvegardee <- TRUE # FALSE pour créer la base, TRUE pour charger filo_merged déjà créée (pour gagner du temps si on relance le prbm)
 
-dist_rayon <- 500 # Rayon = 500m vol d'oiseau
+dist_rayon <- 1000 # Rayon = 500m vol d'oiseau
 rayon = TRUE
 
 # Les sous-dossiers
@@ -25,7 +25,7 @@ source(paste(repo_prgm , "05_Traces_graphiques.R" , sep = "/"))
 source(paste(repo_prgm , "06_Econometrie.R" , sep = "/"))
 
 
-liste_var_reg_12_20 <- c("DEC_MED","DEC_D1", "DEC_D2", "DEC_D3", "DEC_D4", "DEC_D6", "DEC_D7", "DEC_D8", "DEC_D9",
+liste_var_reg_12_20 <- c("DEC_TP60","DEC_MED","DEC_D1", "DEC_D2", "DEC_D3", "DEC_D4", "DEC_D6", "DEC_D7", "DEC_D8", "DEC_D9",
                          "DEC_RD", "DEC_PCHO", "DEC_PPEN", "DEC_PAUT")
 liste_var_reg_13_20 <- c("DEC_Q1", "DEC_Q3","DEC_S80S20", "DEC_GI", "DEC_PTSA", "DEC_PBEN")
 
@@ -70,18 +70,8 @@ dt_recap <- Faire_regression_evolution_traitement(data_loc, liste_var_reg_12_20,
   
 
 alpha <- 0.1
-data_loc <- copy(dt_recap)
-dt_recap <- Ajout_pval_BH(data_loc, alpha)
-
-titre <- "pvalue et significativité\nau sens de la procédure de Benjamini-Hochberg"
-titre_save <- paste(repo_sorties, "Trace_pval_BH.pdf", sep = "/")
-scale_y <- "identity" # identity ou log10 pour l'axe y
-trace_pval_BH(dt_recap, alpha, titre_save, titre, scale_y)
-
-# Idem en échelle log
-titre_save <- paste(repo_sorties, "Trace_pval_BH_log.pdf", sep = "/")
-scale_y <- "log10" # identity ou log10 pour l'axe y
-trace_pval_BH(dt_recap, alpha, titre_save, titre, scale_y)
+dt_recap <- Ajout_pval_BH(dt_recap, alpha)
+dt_recap <- Ajout_pval_Bonf(dt_recap, alpha)
 
 # Pour faire des variables plus compréhensibles dans les sorties
 dt_recap[, variable_label := factor(
@@ -111,12 +101,34 @@ dt_recap[, variable_label := factor(
   )
 )
 ]
-l <- c("variable_label", "pval_BH", "Estimate")
+l <- c("variable_label", "pval_BH","pval_Bonf", "Estimate")
 xtable(dt_recap[,..l])
 dt_recap[,..l]
 
+
+titre <- "pvalue et significativité\nau sens de la procédure de Benjamini-Hochberg"
+titre_save <- paste(repo_sorties, "Trace_pval_BH.pdf", sep = "/")
+scale_y <- "identity" # identity ou log10 pour l'axe y
+trace_pval_BH(dt_recap, alpha, titre_save, titre, scale_y)
+
+# Idem en échelle log
+titre_save <- paste(repo_sorties, "Trace_pval_BH_log.pdf", sep = "/")
+scale_y <- "log10" # identity ou log10 pour l'axe y
+trace_pval_BH(dt_recap, alpha, titre_save, titre, scale_y)
+
 l <- c("reconstruit", "DEC_EQ20")
 filo_merged[,..l]
+
+############ QQ VERIFS
+mean(filo_merged[beneficiaire == 1]$DEC_D220 - filo_merged[beneficiaire == 1]$DEC_D212, na.rm = TRUE)
+mean(filo_merged[beneficiaire == 0]$DEC_D220 - filo_merged[beneficiaire == 0]$DEC_D212, na.rm = TRUE)
+
+mean(filo_merged[beneficiaire == 1]$DEC_D220, na.rm = TRUE) - mean(filo_merged[beneficiaire == 0 & substr(IRIS, 1, 2) != "75"]$DEC_D220, na.rm = TRUE)
+mean(filo_merged[beneficiaire == 1]$DEC_D220, na.rm = TRUE) - mean(filo_merged[beneficiaire == 0]$DEC_D220, na.rm = TRUE)
+mean(filo_merged[beneficiaire == 1]$DEC_D212, na.rm = TRUE) - mean(filo_merged[beneficiaire == 0]$DEC_D212, na.rm = TRUE)
+
+
+table(filo_merged$DEC_D220)
 
 #### BROUILLON EN DESSOUS ##############
 # 
