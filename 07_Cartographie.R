@@ -53,7 +53,11 @@ for(var in liste_var_reg_12_20){
   data_loc[, paste("EVO", var, sep = "_") := get(var_20) - get(var_12)]
 }
 
+nrow(data_loc)
+
 a <- merge(data_loc, map_iris_idf, by.x = "IRIS", by.y = "CODE_IRIS") |> st_as_sf()
+
+nrow(a)
 
 for(var in liste_var_reg_12_20){
   var <- paste("EVO", var, sep = "_")
@@ -71,6 +75,17 @@ for(var in liste_var_reg_12_20){
   eval(parse(text = txt))
 }
 
+tmap_full_EVO_DEC_D9
+
+# #781890000
+# filo_merged[IRIS == "781890000"]
+# filo_merged[IRIS == "781890000"]$DEC_D918
+# 
+# filo_2012[IRIS == '781890000']
+# pop_2020[IRIS == "781890000"]
+# colnames(pop_20)
+# 
+# filo_2020[IRIS == '78189']
 #GGPLOT, en cours
 
 fond_carte_idf <- map_data(map = "france", region = c("Paris", "Hauts-de-Seine", "Val-de-Marne", "Seine-Saint-Denis", "Essonne", "Yvelines", "Seine-et-Marne", "Val-Doise"))

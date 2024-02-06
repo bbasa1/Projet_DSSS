@@ -6,9 +6,9 @@
 #### PACKAGES, PARAMETRES ET DOSSIERS ==========================================
 ################################################################################
 
-# repgen <- "C:/Users/Benjamin/Desktop/Ensae/3A-M2/Projet_DSSS" # Benjamin
-repgen <- "~/Desktop/R/Projet_DSSS" # Tanguy
-utiliser_filo_merged_sauvegardee <- FALSE # FALSE pour créer la base, TRUE pour charger filo_merged déjà créée (pour gagner du temps si on relance le prbm)
+repgen <- "C:/Users/Benjamin/Desktop/Ensae/3A-M2/Projet_DSSS" # Benjamin
+# repgen <- "~/Desktop/R/Projet_DSSS" # Tanguy
+utiliser_filo_merged_sauvegardee <- TRUE # FALSE pour créer la base, TRUE pour charger filo_merged déjà créée (pour gagner du temps si on relance le prbm)
 
 dist_rayon <- 500 # Rayon = 500m vol d'oiseau
 rayon = TRUE
