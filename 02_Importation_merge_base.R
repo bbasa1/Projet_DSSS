@@ -27,9 +27,6 @@ pop_2013 <- as.data.table(read_excel(path = paste(repo_data, "Population_Annees/
 pop_2012 <- as.data.table(read_excel(path = paste(repo_data, "Population_Annees/base-ic-evol-struct-pop-2012.xls", sep = "/"), sheet = 1, skip = 5))
 
 # Filo pour communes
-# filo_2020_comm <- as.data.table(read.table(paste(repo_data, "Filosofi_Annees/FILO_DEC_COM_2020.csv", sep = "/"), dec=",", sep=";", header = TRUE, na.strings = c('ns', 's', '', 'so', 'nd')))
-# filo_2019_comm <- as.data.table(read.csv(paste(repo_data, "Filosofi_Annees/FILO_DEC_COM_2019.csv", sep = "/"), header = TRUE, sep=";" ))
-# filo_2018_comm <- as.data.table(read.csv(paste(repo_data, "Filosofi_Annees/FILO_DEC_COM_2018.csv", sep = "/"), header = TRUE, sep=";" ))
 filo_2020_comm <- as.data.table(read_excel(path = paste(repo_data, "Filosofi_Annees/FILO_DEC_COM_2020.xlsx", sep = "/"), sheet = 2, skip = 5))
 filo_2019_comm <- as.data.table(read_excel(path = paste(repo_data, "Filosofi_Annees/FILO_DEC_COM_2019.xlsx", sep = "/"), sheet = 2, skip = 5))
 filo_2018_comm <- as.data.table(read_excel(path = paste(repo_data, "Filosofi_Annees/FILO_DEC_COM_2018.xlsx", sep = "/"), sheet = 2, skip = 5))
@@ -70,21 +67,21 @@ for(annee in 2012:2020){
   # On renome qq colonnes pour récupérer les données communes  
   setnames(filo_loc_comm, "RD", paste("RD", substr(annee, 3, 4), sep = ""))
   setnames(filo_loc_comm, "Q3_Q1", paste("Q3_Q1", substr(annee, 3, 4), sep = ""))
-  setnames(filo_loc_comm, paste("Q2", substr(annee, 3, 4), sep = ""),  paste("MED", substr(annee, 1, 2), sep = ""))
+  setnames(filo_loc_comm, paste("Q2", substr(annee, 3, 4), sep = ""),  paste("MED", substr(annee, 3, 4), sep = ""))
   filo_loc_comm[, LIBGEO := NULL]
   filo_loc_merged[, COM := substr(IRIS, 1, 5)]
   filo_loc_merged <- merge(filo_loc_merged, filo_loc_comm, by.x = 'COM', by.y = "CODGEO", all.x = TRUE)
 
   # On met les données communes dans les IRIS manquants
   if(annee != 2012){ # Pour cette liste ça ne marche pas en 2012
-    for(var in liste_var_reg_13_20_comm){
+    for(var in liste_var_reg_13_20){
       nom_col_iris <- paste(var, substr(annee, 3, 4), sep = "")
       nom_col_comm <- substr(nom_col_iris, 5, 1000)
       filo_loc_merged[IRIS %in% liste_IRIS_NAN, eval(nom_col_iris) := get(nom_col_comm)]
     }  
   }
   
-  for(var in liste_var_reg_12_20_comm){
+  for(var in liste_var_reg_12_20){
     nom_col_iris <- paste(var, substr(annee, 3, 4), sep = "")
     nom_col_comm <- substr(nom_col_iris, 5, 1000)
     filo_loc_merged[IRIS %in% liste_IRIS_NAN, eval(nom_col_iris) := get(nom_col_comm)]
@@ -98,30 +95,11 @@ for(annee in 2012:2020){
 
 
 
-#### ETAPE BIS = ON SUPPRIME LES TABLES POUR LIBERER DE LA RAM
-# A faire
-
-
-
-# liste_var_reg_12_20 <- c("DEC_TP60", "DEC_MED",
-#                          "DEC_D1", "DEC_D2", "DEC_D3", "DEC_D4", "DEC_D6", "DEC_D7", "DEC_D8", "DEC_D9",
-#                          "DEC_RD", "DEC_PCHO", "DEC_PPEN", "DEC_PAUT")
-# liste_var_reg_13_20 <- c("DEC_Q1", "DEC_Q3", "DEC_EQ","DEC_S80S20", "DEC_GI", "DEC_PTSA", "DEC_PBEN")
+# liste_IRIS_NAN <- filo_loc_merged[is.na(get(nom_col_IRIS_NAN))]$IRIS
 # 
-# var <- "DEC_D1"
-# annee <- 20
-# 
-# colnames(filo_loc_comm)
-
-
-
-
-
-liste_IRIS_NAN <- filo_loc_merged[is.na(get(nom_col_IRIS_NAN))]$IRIS
-
-nom_col_iris <- paste(var, annee, sep = "")
-nom_col_comm <- substr(nom_col_iris, 5, 1000)
-filo_loc_merged[IRIS %in% liste_IRIS_NAN, eval(nom_col_iris) := get(nom_col_comm)]
+# nom_col_iris <- paste(var, annee, sep = "")
+# nom_col_comm <- substr(nom_col_iris, 5, 1000)
+# filo_loc_merged[IRIS %in% liste_IRIS_NAN, eval(nom_col_iris) := get(nom_col_comm)]
 
 
 
