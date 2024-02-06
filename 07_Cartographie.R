@@ -10,17 +10,14 @@ map_stations_gpe_rayon <- st_buffer(map_stations_gpe, dist_rayon)
 arrets <- st_read(paste(repo_data, "Lignes IDF/arrets-lignes.shp", sep = '/')) |> 
   select(id, nom_commune, code_insee, stop_id, stop_name, route_long_, operatornam)
 
-# On garde IRIS typés "H" (IRIS d'habitation)
+# On retire IRIS typés "D" (IRIS divers : en général parcs et forêts donc peu habités)
 map_iris_idf <- st_as_sf(map_iris) |> filter(substr(as.character(INSEE_COM), 1, 2) %in% liste_dep_idf, TYP_IRIS != "D")
-                    
-
 
 #gtfsio::import_gtfs(paste(repo_data, "GTFS/Archive.zip", sep = '/'), encoding = "UTF-8")
 
 #tm_shape(arrets |> filter(id == "IDFM:C01743")) + tm_dots(col = "blue") +
   #tm_shape(arrets |> filter(route_long_ == "A")) + tm_dots(col = "red")
   
-
 intersection <- st_intersection(map_iris_idf, map_stations_gpe_rayon)
 intersects <- st_intersects(map_iris_idf, map_stations_gpe_rayon) |> as.data.frame()
 
@@ -29,7 +26,6 @@ intersects_no_rayon <- st_intersects(map_iris_idf, map_stations_gpe) |> as.data.
 map_iris_idf$row = row(map_iris_idf)[,1]
 map_iris_idf <- map_iris_idf |> mutate(intersects = row %in% intersects$row.id, 
                                        intersects_no_rayon = row %in% intersects_no_rayon$row.id)
-
 
 # Traitement = IRIS contient gare GPE
 
@@ -43,7 +39,7 @@ tm_shape(map_iris_idf) + tm_polygons(alpha = 0) +
   tm_shape(intersection) + tm_polygons(alpha = 0.8, col = 'red') +
   tm_shape(map_iris_idf |> filter(intersects)) + tm_polygons(alpha = 0.4, col = "red")
 
-# On reconstruit les variables évolutions pour les tracer sur la carte
+# On reconstruit les variables évolution pour les tracer sur la carte
 
 data_loc <- copy(filo_merged)
 for(var in liste_var_reg_12_20){
@@ -56,20 +52,24 @@ for(var in liste_var_reg_12_20){
 a <- merge(data_loc, map_iris_idf, by.x = "IRIS", by.y = "CODE_IRIS") |> st_as_sf()
 
 for(var in liste_var_reg_12_20){
-  var <- paste("EVO", var, sep = "_")
-  txt = paste("tmap_traite_", var, " <- tm_shape(a |> filter(intersects)) + tm_polygons(col = var, palette = 'viridis', style = 'cont', border.alpha = 0)", sep = "")
-  eval(parse(text = txt))
-  
-  txt = paste("tmap_", var, " <- tm_shape(a) + tm_polygons(col = var, palette = 'viridis', midpoint = 0, style = 'cont', border.alpha = 0)", sep = "")
+  varevo <- paste("EVO", var, sep = "_")
+  var_20 <- paste(var, "20", sep = "")
+  var_12 <- paste(var, "12", sep = "")
+  txt = paste("tmap_full_", varevo, " <- tm_shape(a |> filter(intersects)) + tm_polygons(col = varevo, palette = 'viridis', midpoint = 0, style = 'cont', border.alpha = 0) + tm_shape(a) + tm_polygons(col = varevo, palette = 'viridis', midpoint = 0, style = 'cont', border.alpha = 0) + tm_shape(intersection) + tm_polygons(alpha = 0.8, col = 'red')", sep = "")
+  txt = paste("tmap_compare_", var, " <- 
+              tm_shape(a |> filter(intersects)) + tm_polygons(col = var_12, palette = 'viridis', style = 'cont', border.alpha = 0) + 
+              tm_shape(a |> filter(intersects)) + tm_polygons(col = var_20, palette = 'viridis', style = 'cont', border.alpha = 0) + 
+              tm_shape(a) + tm_polygons(col = var_12, palette = 'viridis', style = 'cont', border.alpha = 0) + 
+              tm_shape(a) + tm_polygons(col = var_20, palette = 'viridis', style = 'cont', border.alpha = 0) + 
+              tm_shape(intersection) + tm_polygons(alpha = 0.8, col = 'red')", sep = "")
   eval(parse(text = txt))
 }
 
+tm_shape(a) + tm_polygons(col = "DEC_MED12", palette = 'viridis', style = 'cont', border.alpha = 0) + 
+  tm_shape(a) + tm_polygons(col = "DEC_MED20", palette = 'viridis', style = 'cont', border.alpha = 0)
 
-for(var in liste_var_reg_12_20){
-  var <- paste("EVO", var, sep = "_")
-  txt = paste("tmap_full_", var, " <- tm_shape(a |> filter(intersects)) + tm_polygons(col = var, palette = 'viridis', midpoint = 0, style = 'cont', border.alpha = 0) + tm_shape(a) + tm_polygons(col = var, palette = 'viridis', midpoint = 0, style = 'cont', border.alpha = 0)", sep = "")
-  eval(parse(text = txt))
-}
+
+
 
 #GGPLOT, en cours
 
