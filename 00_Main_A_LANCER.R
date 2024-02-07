@@ -93,9 +93,6 @@ trace_pval_Bonf(dt_recap, alpha, titre_save, titre, scale_y)
 
 
 
-l <- c("reconstruit", "DEC_EQ20")
-filo_merged[,..l]
-
 ############ QQ VERIFS
 mean(filo_merged[beneficiaire == 1]$DEC_D220 - filo_merged[beneficiaire == 1]$DEC_D212, na.rm = TRUE)
 mean(filo_merged[beneficiaire == 0]$DEC_D220 - filo_merged[beneficiaire == 0]$DEC_D212, na.rm = TRUE)
@@ -107,8 +104,25 @@ mean(filo_merged[beneficiaire == 1]$DEC_D212, na.rm = TRUE) - mean(filo_merged[b
 
 table(filo_merged$DEC_D220)
 
-#### BROUILLON EN DESSOUS ##############
-# 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+################################################################################
+########################### BROUILLON EN DESSOUS ###############################
+################################################################################
+
+
 # ########## Puis les stats des à compléter.... ##########
 # 
 # colnames(filo_2012)
