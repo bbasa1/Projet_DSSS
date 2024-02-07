@@ -35,6 +35,39 @@ preparation_table_stat_par_annee <- function(data_loc, colonne_trace){
 }
 
 
+ajout_label_variables_filosofi <- function(data_loc){
+  # Pour faire des variables plus compréhensibles dans les sorties
+  ### ATTENTION nécessite que ce soit la colonne "variable", et créé la colonne "variable_label"
+  
+  data_loc[, variable_label := factor(
+    fcase(
+      variable == "DEC_PPEN", "Part des pensions, retraites et rentes (%)",
+      variable == "DEC_D2", "2e décile (€)",
+      variable == "DEC_D1", "1er décile (€)",
+      variable == "DEC_D3", "3e décile (€)",
+      variable == "DEC_D4", "4e décile (€)",
+      variable == "DEC_PBEN", "Part des revenus d'activités non salariées (%)",
+      variable == "DEC_Q1", "1er quartile(€)",
+      variable == "DEC_PCHO", "Part des indemnités de chômage (%)",
+      variable == "DEC_EQ", "Écart interquartile rapporté à la médiane",
+      variable == "DEC_TP60", "Taux de bas revenus déclarés au seuil de 60 % (%)",
+      variable == "DEC_MED", "Médiane (€)",
+      variable == "DEC_D8", "8e décile (€)",
+      variable == "DEC_GI", "Indice de Gini",
+      variable == "DEC_Q3", "3e quartile(€)",
+      variable == "DEC_D6", "6e décile (€)",
+      variable == "DEC_D7", "7e décile (€)",
+      variable == "DEC_PTSA", "Part des revenus d'activités salariées (%)",
+      variable == "DEC_D9", "9e décile (€)",
+      variable == "DEC_RD", "Rapport interdécile D9/D1",
+      variable == "DEC_S80S20", "S80/S20",
+      variable == "DEC_PAUT", "Part des autres revenus (%)"
+      
+    )
+  )
+  ]
+}
+
 trace_var_annee <- function(data_loc, colonne_trace, label_colonne_trace, titre_save, titre, label_color){
   # Fait le tracé des et la droite de régression pour chaque groupe
   p <- ggplot(data_loc, aes(x = annee, y = value, color = beneficiaire)) +
@@ -63,7 +96,25 @@ trace_pval_BH <- function(data_loc, alpha, titre_save, titre, scale_y = "identit
     labs(
       x = " ", 
       y = "pvalue",
-      color = paste("Significatif à ", 100*alpha, "% \n(au sens BH)", sep = ""),
+      color = paste("Significatif à ", 100*alpha, "% \n(au sens B-H)", sep = ""),
+      title = titre
+    ) +
+    scale_y_continuous(trans=scale_y) +
+    theme(text = element_text(size = 25))
+  
+  ggsave(titre_save, p ,  width = 297, height = 210, units = "mm")
+  print(p)
+}
+
+trace_pval_Bonf <- function(data_loc, alpha, titre_save, titre, scale_y = "identity"){
+  # Fait le tracé des pvalues et leur significativité au sens de la procédure de Bonferroni
+  p <- ggplot(data_loc) +
+    geom_point(aes(x = ordre_pval, y = pvalue, color = signif_BH), size = 8) +
+    geom_line(aes(x = ordre_pval, y = alpha/nrow(data_loc))) +
+    labs(
+      x = " ", 
+      y = "pvalue",
+      color = paste("Significatif à ", 100*alpha, "% \n(au sens Bonf.)", sep = ""),
       title = titre
     ) +
     scale_y_continuous(trans=scale_y) +

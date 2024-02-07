@@ -4,7 +4,7 @@
 ################################################################################
 ################################################################################
 
-Faire_regression_evolution_traitement <- function(data_loc, liste_var_reg_12_20, liste_var_reg_13_20){
+Faire_regression_evolution_traitement <- function(data_loc, liste_var_reg_12_20, liste_var_reg_13_20, Ponderer_regression = FALSE){
   # Fait toutes les régressions linéaire de la forme X = Traitement, Y = Evolution des var socio-eco
   
   # Création d'un data.tabla vierge pour stocker les résultats
@@ -19,8 +19,14 @@ Faire_regression_evolution_traitement <- function(data_loc, liste_var_reg_12_20,
     var_12 <- paste(var, "12", sep = "")
     
     data_loc[, Evolution := get(var_20) - get(var_12)]
-    # model <- lm(Evolution ~ beneficiaire, data = data_loc[TYP_IRIS_20 == 'H'], weights = P20_POP, na.action=na.exclude)
-    model <- lm(Evolution ~ beneficiaire, data = data_loc[TYP_IRIS_20 == 'H'], na.action=na.exclude)
+    
+    # Est-ce qu'on pondère la regression ou non
+    if(Ponderer_regression){
+      model <- lm(Evolution ~ beneficiaire, data = data_loc[TYP_IRIS_20 == 'H'], weights = P20_POP, na.action=na.exclude) 
+    }else{
+      model <- lm(Evolution ~ beneficiaire, data = data_loc[TYP_IRIS_20 == 'H'], na.action=na.exclude)
+    }
+    
     df_loc <- as.data.table(summary(model)$coefficients)[2,]
     setnames(df_loc, "Pr(>|t|)", "pvalue")
     df_loc$variable <- var

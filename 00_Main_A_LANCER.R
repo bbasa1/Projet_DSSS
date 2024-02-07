@@ -214,3 +214,12 @@ table(filo_merged$DEC_D220)
 # }
 # # model <- lm(value ~ annee, data = table_RD_for_plot[beneficiaire == 'diff'])
 # # summary(model)
+
+
+as.data.table(read.csv("C:/Users/Benjamin/Desktop/municipales-2008-résultats-bureaux_vote-tour2.csv",skip = 1, header = FALSE, sep=c(",", "\t") , quote=""))
+read.table("C:/Users/Benjamin/Desktop/municipales-2008-résultats-bureaux_vote-tour2.csv",header=TRUE,dec=",")
+
+# 36 colonnes L1
+# 26 colonnes header
+
+"municipales-2008-résultats-bureaux_vote-tour2.csv"
