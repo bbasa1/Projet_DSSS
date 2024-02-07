@@ -8,7 +8,7 @@
 
 repgen <- "C:/Users/Benjamin/Desktop/Ensae/3A-M2/Projet_DSSS" # Benjamin
 # repgen <- "~/Desktop/R/Projet_DSSS" # Tanguy
-utiliser_filo_merged_sauvegardee <- FALSE # FALSE pour créer la base, TRUE pour charger filo_merged déjà créée (pour gagner du temps si on relance le prbm)
+utiliser_filo_merged_sauvegardee <- TRUE # FALSE pour créer la base, TRUE pour charger filo_merged déjà créée (pour gagner du temps si on relance le prbm)
 
 dist_rayon <- 500 # Rayon = 500m vol d'oiseau
 
@@ -42,10 +42,6 @@ if(! utiliser_filo_merged_sauvegardee){
 }else{
   load(paste(repo_data, "filo_merged.RData", sep = "/"))
 }
-
-# filo_merged[]
-# filo_merged[COM.x == "91345" | COM.y == "91345"]
-# table(filo_merged$COM.x == filo_merged$COM.y)
 
 # Il faudrait lancer le script 03 ici pour gérer les IRIS modifiés/Créés/supprimés ==> Script à terminer
 # source(paste(repo_prgm , "03_Gestion_IRIS_modifs_par_annee.R" , sep = "/"))

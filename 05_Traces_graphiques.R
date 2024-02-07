@@ -109,7 +109,7 @@ trace_pval_BH <- function(data_loc, alpha, titre_save, titre, scale_y = "identit
 trace_pval_Bonf <- function(data_loc, alpha, titre_save, titre, scale_y = "identity"){
   # Fait le tracé des pvalues et leur significativité au sens de la procédure de Bonferroni
   p <- ggplot(data_loc) +
-    geom_point(aes(x = ordre_pval, y = pvalue, color = signif_BH), size = 8) +
+    geom_point(aes(x = ordre_pval, y = pvalue, color = signif_Bonf), size = 8) +
     geom_line(aes(x = ordre_pval, y = alpha/nrow(data_loc))) +
     labs(
       x = " ", 
