@@ -8,10 +8,11 @@
 
 repgen <- "C:/Users/Benjamin/Desktop/Ensae/3A-M2/Projet_DSSS" # Benjamin
 # repgen <- "~/Desktop/R/Projet_DSSS" # Tanguy
-utiliser_filo_merged_sauvegardee <- TRUE # FALSE pour créer la base, TRUE pour charger filo_merged déjà créée (pour gagner du temps si on relance le prbm)
+utiliser_filo_merged_sauvegardee <- FALSE # FALSE pour créer la base, TRUE pour charger filo_merged déjà créée (pour gagner du temps si on relance le prbm)
 
-dist_rayon <- 1000 # Rayon = 500m vol d'oiseau
-rayon = TRUE
+dist_rayon <- 500 # Rayon = 500m vol d'oiseau
+
+Ponderer_regression <- FALSE # TRUE pour pondérer les régressions par la population des IRIS, FALSE sinon
 
 # Les sous-dossiers
 repo_prgm <- paste(repgen, "Projet_DSSS" , sep = "/")
@@ -21,6 +22,7 @@ repo_inter <- paste(repgen, "Bases_intermediaires" , sep = "/")
 
 # On commence par importer les packages et les sous-programmes composés uniquement de fnts
 source(paste(repo_prgm , "01_packages.R" , sep = "/"))
+source(paste(repo_prgm , "04_IRIS_Traites_et_temoins.R" , sep = "/"))
 source(paste(repo_prgm , "05_Traces_graphiques.R" , sep = "/"))
 source(paste(repo_prgm , "06_Econometrie.R" , sep = "/"))
 
@@ -49,72 +51,47 @@ if(! utiliser_filo_merged_sauvegardee){
 # source(paste(repo_prgm , "03_Gestion_IRIS_modifs_par_annee.R" , sep = "/"))
 
 # On assigne la variable de traitement, rayon pour traitement des IRIS dans un certain rayon autour des gares GPE
-source(paste(repo_prgm , "04_IRIS_Traites_et_temoins.R" , sep = "/"))
-
-
+data_loc <- copy(filo_merged)
+dist_rayon_loc <- dist_rayon
+filo_merged <- Assigner_traitement(dist_rayon, data_loc)
+  
 # Vérification de la construction  
 table(filo_merged$beneficiaire) # On a 67 IRIS bénéficiaires pour 69 gares
-length(unique(liste_IRIS_beneficiaires)) # Mais en fait deux IRIS sont en doublons (et ont 2 gares)
-filo_merged # La tête de la base
-# liste_longeurs_merged # La longueur de la base merged 2012 --> 2020
-# liste_longeurs_filo_annee # Le nombre d'IRIS par année en IdF dans filosofi 2012 --> 2020
-
 
 ################################################################################
 #### ECONOMETRIE ===============================================================
 ################################################################################
 # Régression de évolution des variables socio-éco sur 8 ans par la variable de traitement
 
+# Les régressions
 data_loc <- copy(filo_merged)
-dt_recap <- Faire_regression_evolution_traitement(data_loc, liste_var_reg_12_20, liste_var_reg_13_20)
+dt_recap <- Faire_regression_evolution_traitement(data_loc, liste_var_reg_12_20, liste_var_reg_13_20, Ponderer_regression)
   
-
+# Calcul des pvalues, mise en forme
 alpha <- 0.1
 dt_recap <- Ajout_pval_BH(dt_recap, alpha)
 dt_recap <- Ajout_pval_Bonf(dt_recap, alpha)
 
-# Pour faire des variables plus compréhensibles dans les sorties
-dt_recap[, variable_label := factor(
-  fcase(
-    variable == "DEC_PPEN", "Part des pensions, retraites et rentes (%)",
-    variable == "DEC_D2", "2e décile (€)",
-    variable == "DEC_D1", "1er décile (€)",
-    variable == "DEC_D3", "3e décile (€)",
-    variable == "DEC_D4", "4e décile (€)",
-    variable == "DEC_PBEN", "Part des revenus d'activités non salariées (%)",
-    variable == "DEC_Q1", "1er quartile(€)",
-    variable == "DEC_PCHO", "Part des indemnités de chômage (%)",
-    variable == "DEC_EQ", "Écart interquartile rapporté à la médiane",
-    variable == "DEC_TP60", "Taux de bas revenus déclarés au seuil de 60 % (%)",
-    variable == "DEC_MED", "Médiane (€)",
-    variable == "DEC_D8", "8e décile (€)",
-    variable == "DEC_GI", "Indice de Gini",
-    variable == "DEC_Q3", "3e quartile(€)",
-    variable == "DEC_D6", "6e décile (€)",
-    variable == "DEC_D7", "7e décile (€)",
-    variable == "DEC_PTSA", "Part des revenus d'activités salariées (%)",
-    variable == "DEC_D9", "9e décile (€)",
-    variable == "DEC_RD", "Rapport interdécile D9/D1",
-    variable == "DEC_S80S20", "S80/S20",
-    variable == "DEC_PAUT", "Part des autres revenus (%)"
-    
-  )
-)
-]
+data_loc <- copy(dt_recap)
+dt_recap <- ajout_label_variables_filosofi(data_loc)
+  
+
 l <- c("variable_label", "pval_BH","pval_Bonf", "Estimate")
 xtable(dt_recap[,..l])
 dt_recap[,..l]
 
-
+# Tracés
 titre <- "pvalue et significativité\nau sens de la procédure de Benjamini-Hochberg"
 titre_save <- paste(repo_sorties, "Trace_pval_BH.pdf", sep = "/")
 scale_y <- "identity" # identity ou log10 pour l'axe y
 trace_pval_BH(dt_recap, alpha, titre_save, titre, scale_y)
 
-# Idem en échelle log
-titre_save <- paste(repo_sorties, "Trace_pval_BH_log.pdf", sep = "/")
-scale_y <- "log10" # identity ou log10 pour l'axe y
-trace_pval_BH(dt_recap, alpha, titre_save, titre, scale_y)
+titre <- "pvalue et significativité\nau sens de la procédure de Bonferroni"
+titre_save <- paste(repo_sorties, "Trace_pval_Bonf.pdf", sep = "/")
+scale_y <- "identity" # identity ou log10 pour l'axe y
+trace_pval_Bonf(dt_recap, alpha, titre_save, titre, scale_y)
+
+
 
 l <- c("reconstruit", "DEC_EQ20")
 filo_merged[,..l]
@@ -216,10 +193,10 @@ table(filo_merged$DEC_D220)
 # # summary(model)
 
 
-as.data.table(read.csv("C:/Users/Benjamin/Desktop/municipales-2008-résultats-bureaux_vote-tour2.csv",skip = 1, header = FALSE, sep=c(",", "\t") , quote=""))
-read.table("C:/Users/Benjamin/Desktop/municipales-2008-résultats-bureaux_vote-tour2.csv",header=TRUE,dec=",")
-
-# 36 colonnes L1
-# 26 colonnes header
-
-"municipales-2008-résultats-bureaux_vote-tour2.csv"
+# as.data.table(read.csv("C:/Users/Benjamin/Desktop/municipales-2008-résultats-bureaux_vote-tour2.csv",skip = 1, header = FALSE, sep=c(",", "\t") , quote=""))
+# read.table("C:/Users/Benjamin/Desktop/municipales-2008-résultats-bureaux_vote-tour2.csv",header=TRUE,dec=",")
+# 
+# # 36 colonnes L1
+# # 26 colonnes header
+# 
+# "municipales-2008-résultats-bureaux_vote-tour2.csv"
