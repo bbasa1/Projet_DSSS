@@ -6,8 +6,8 @@
 #### PACKAGES, PARAMETRES ET DOSSIERS ==========================================
 ################################################################################
 
-repgen <- "C:/Users/Benjamin/Desktop/Ensae/3A-M2/Projet_DSSS" # Benjamin
-# repgen <- "~/Desktop/R/Projet_DSSS" # Tanguy
+# repgen <- "C:/Users/Benjamin/Desktop/Ensae/3A-M2/Projet_DSSS" # Benjamin
+repgen <- "~/Desktop/R/Projet_DSSS" # Tanguy
 utiliser_filo_merged_sauvegardee <- TRUE # FALSE pour créer la base, TRUE pour charger filo_merged déjà créée (pour gagner du temps si on relance le prbm)
 
 dist_rayon <- 500 # Rayon = 500m vol d'oiseau
@@ -110,13 +110,19 @@ table(filo_merged$DEC_D220)
 
 
 
-
-
-
-
 ################################################################################
 ########################### BROUILLON EN DESSOUS ###############################
 ################################################################################
+
+# Avec nouvelle variable instru (il y a un bug qq part)
+
+data_loc2 <- copy(filo_merged)
+
+data_loc2 <- Variable_distance_aeroport(data_loc)
+dt_recap <- Faire_regression_IV_evolution_traitement(data_loc2, liste_var_reg_12_20, liste_var_reg_13_20, Ponderer_regression)
+
+
+
 
 
 # ########## Puis les stats des à compléter.... ##########

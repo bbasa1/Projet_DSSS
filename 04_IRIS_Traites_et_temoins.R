@@ -63,10 +63,10 @@ Variable_distance_aeroport <- function(data_loc){
   df <- copy(data_loc)
   df <- merge(map_iris, df, by.x = "CODE_IRIS", by.y = "IRIS")
   
-  df$distance <- st_distance(df, puntos_linestr)
+  df$distance_aeroport <- st_distance(df, puntos_linestr)
   # taper 'carte_verif' dans la console pour vérifier 
-  carte_verif <- tm_shape(df) + tm_polygons(col = "distance", style = "cont") + tm_shape(puntos_linestr) + tm_lines(col = "red")
+  carte_verif <- tm_shape(df) + tm_polygons(col = "distance_aeroport", style = "cont") + tm_shape(puntos_linestr) + tm_lines(col = "red")
   df <- df |> st_drop_geometry()
-  return(df)
+  return(as.data.table(df))
 }
   
