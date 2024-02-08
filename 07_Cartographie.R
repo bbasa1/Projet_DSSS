@@ -10,9 +10,15 @@ map_stations_gpe_rayon <- st_buffer(map_stations_gpe, dist_rayon)
 arrets <- st_read(paste(repo_data, "Lignes IDF/arrets-lignes.shp", sep = '/')) |> 
   select(id, nom_commune, code_insee, stop_id, stop_name, route_long_, operatornam)
 
+
+lignes <- st_read(paste(repo_data, "Lignes IDF/lignes.shp", sep = '/')) |> 
+  select(route_id, route_long_, route_type, networkname, operatornam)
+
 # On retire IRIS typés "D" (IRIS divers : en général parcs et forêts donc peu habités)
 map_iris_idf <- st_as_sf(map_iris) |> filter(substr(as.character(INSEE_COM), 1, 2) %in% liste_dep_idf, TYP_IRIS != "D")
 
+arrets_c <- arrets |> group_by(stop_id) |> st_centroid() |> unique()
+tm_shape(arrets_c) + tm_dots(col = 'blue')
 #gtfsio::import_gtfs(paste(repo_data, "GTFS/Archive.zip", sep = '/'), encoding = "UTF-8")
 
 #tm_shape(arrets |> filter(id == "IDFM:C01743")) + tm_dots(col = "blue") +
@@ -62,13 +68,13 @@ for(var in liste_var_reg_12_20){
               tm_shape(a |> filter(intersects)) + tm_polygons(col = var_12, palette = 'viridis', style = 'cont', border.alpha = 0) + 
               tm_shape(a |> filter(intersects)) + tm_polygons(col = var_20, palette = 'viridis', style = 'cont', border.alpha = 0) + 
               tm_shape(a) + tm_polygons(col = var_12, palette = 'viridis', style = 'cont', border.alpha = 0) + 
-              tm_shape(a) + tm_polygons(col = var_20, palette = 'viridis', style = 'cont', border.alpha = 0) + 
+              tm_shape(a) + tm_polygons(col = var_20, palette = 'viridis', style = 'cont', border.alpha = 0, labels = ) + 
               tm_shape(intersection) + tm_polygons(alpha = 0.8, col = 'red')", sep = "")
   eval(parse(text = txt))
 }
 
-tm_shape(a) + tm_polygons(col = "DEC_MED12", palette = 'viridis', style = 'cont', border.alpha = 0) + 
-  tm_shape(a) + tm_polygons(col = "DEC_MED20", palette = 'viridis', style = 'cont', border.alpha = 0)
+tm_shape(a) + tm_polygons(col = "DEC_MED12", palette = 'viridis', style = 'cont', border.alpha = 0)
+tm_shape(a) + tm_polygons(col = "DEC_MED20", palette = 'viridis', style = 'cont', border.alpha = 0)
 
 
 
