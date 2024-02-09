@@ -74,11 +74,11 @@ Faire_regression_IV_aeroport_evolution_traitement <- function(data_loc, liste_va
     
     # Est-ce qu'on pondère la regression ou non
     if(Ponderer_regression){
-      model <- ivreg(Evolution ~ beneficiaire | distance_aeroport, data = data_loc[TYP_IRIS_20 == 'H'], weights = P20_POP, na.action=na.exclude) 
+      model <- ivreg(Evolution ~ beneficiaire | distance_aeroport, data = data_loc[TYP_IRIS_20 == 'H'], weights = P20_POP) 
     }else{
-      model <- ivreg(Evolution ~ beneficiaire | distance_aeroport, data = data_loc[TYP_IRIS_20 == 'H'], na.action=na.exclude)
+      model <- ivreg(Evolution ~ beneficiaire | distance_aeroport, data = data_loc[TYP_IRIS_20 == 'H'])
     }
-    
+  
     df_loc <- as.data.table(summary(model)$coefficients)[2,]
     setnames(df_loc, "Pr(>|t|)", "pvalue")
     df_loc$variable <- var
@@ -92,7 +92,13 @@ Faire_regression_IV_aeroport_evolution_traitement <- function(data_loc, liste_va
     var_12 <- paste(var, "13", sep = "")
     
     data_loc[, Evolution := get(var_20) - get(var_12)]
-    model <- ivreg(Evolution ~ beneficiaire | distance_aeroport, data = data_loc[TYP_IRIS_20 == 'H'], weights = P20_POP, na.action=na.exclude)
+    
+    if(Ponderer_regression){
+      model <- ivreg(Evolution ~ beneficiaire | distance_aeroport, data = data_loc[TYP_IRIS_20 == 'H'], weights = P20_POP) 
+    }else{
+      model <- ivreg(Evolution ~ beneficiaire | distance_aeroport, data = data_loc[TYP_IRIS_20 == 'H'])
+    }
+    
     df_loc <- as.data.table(summary(model)$coefficients)[2,]
     setnames(df_loc, "Pr(>|t|)", "pvalue")
     df_loc$variable <- var

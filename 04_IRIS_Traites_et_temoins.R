@@ -45,7 +45,6 @@ Assigner_traitement <- function(dist_rayon_loc, data_loc){
 
 
 Variable_distance_aeroport <- function(data_loc){
-  data_loc <- filo_merged
   ###### On récupère les IRIS bénéficiaires du GPE
   path_iris <- paste(repo_data, "CONTOURS-IRIS-2020/1_DONNEES_LIVRAISON_2020-12-00282/CONTOURS-IRIS_2-1_SHP_LAMB93_FXX-2020", sep = "/")
   map_iris <- st_read(paste(path_iris, "CONTOURS-IRIS.shp", sep = '/'))  %>% st_transform(crs = 3035)
@@ -60,13 +59,14 @@ Variable_distance_aeroport <- function(data_loc){
   
   # On crée la ligne qui relie les 3 points (voir script cartographie pour tracé)
   puntos_linestr <- st_combine(puntos_sf) %>% st_cast("LINESTRING")
-  df <- copy(data_loc)
-  df <- merge(map_iris, df, by.x = "CODE_IRIS", by.y = "IRIS")
   
-  df$distance_aeroport <- st_distance(df, puntos_linestr)
+  # data_loc[!( IRIS %in% dt$CODE_IRIS)]$LIBCOM
+  dt_merged_loc <- merge(map_iris, data_loc, by.x = "CODE_IRIS", by.y = "IRIS")
+  
+  dt_merged_loc$distance_aeroport <- st_distance(dt_merged_loc, puntos_linestr)
   # taper 'carte_verif' dans la console pour vérifier 
-  carte_verif <- tm_shape(df) + tm_polygons(col = "distance_aeroport", style = "cont") + tm_shape(puntos_linestr) + tm_lines(col = "red")
-  df <- df |> st_drop_geometry()
-  return(as.data.table(df))
+  carte_verif <- tm_shape(dt_merged_loc) + tm_polygons(col = "distance_aeroport", style = "cont") + tm_shape(puntos_linestr) + tm_lines(col = "red")
+  dt_merged_loc <- dt_merged_loc |> st_drop_geometry()
+  return(as.data.table(dt_merged_loc))
 }
   
