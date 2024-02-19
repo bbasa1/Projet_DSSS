@@ -63,7 +63,8 @@ Faire_regression_IV_aeroport_evolution_traitement <- function(data_loc, liste_va
   dt_recap_loc <- data.table(Estimate = numeric(),
                              pvalue = numeric(),
                              variable = character(),
-                             Annees = character())
+                             Annees = character(),
+                             pval_weak = numeric())
   
   
   for(var in liste_var_reg_12_20){ # Les variables évolutions 2012 --> 2020
@@ -77,12 +78,16 @@ Faire_regression_IV_aeroport_evolution_traitement <- function(data_loc, liste_va
       model <- ivreg(Evolution ~ beneficiaire | distance_aeroport, data = data_loc[TYP_IRIS_20 == 'H'], weights = P20_POP) 
     }else{
       model <- ivreg(Evolution ~ beneficiaire | distance_aeroport, data = data_loc[TYP_IRIS_20 == 'H'])
+      model_lin <- lm(Evolution ~ beneficiaire, data = data_loc[TYP_IRIS_20 == 'H'])
     }
-  
+
     df_loc <- as.data.table(summary(model)$coefficients)[2,]
     setnames(df_loc, "Pr(>|t|)", "pvalue")
     df_loc$variable <- var
-    l <- c("Estimate", "pvalue", "variable")
+    df_loc_weak <- as.data.table(summary(model)$diagnostics)[1,]
+    df_loc$pval_weak <- df_loc_weak$`p-value`
+    
+    l <- c("Estimate", "pvalue", "variable", "pval_weak")
     dt_recap_loc <- rbindlist(list(dt_recap_loc, df_loc[,..l]), fill=TRUE)
   }
   dt_recap_loc$Annees <- "2012 - 2020"
@@ -102,7 +107,11 @@ Faire_regression_IV_aeroport_evolution_traitement <- function(data_loc, liste_va
     df_loc <- as.data.table(summary(model)$coefficients)[2,]
     setnames(df_loc, "Pr(>|t|)", "pvalue")
     df_loc$variable <- var
-    l <- c("Estimate", "pvalue", "variable")
+
+    df_loc_weak <- as.data.table(summary(model)$diagnostics)[1,]
+    df_loc$pval_weak <- df_loc_weak$`p-value`
+    
+    l <- c("Estimate", "pvalue", "variable", "pval_weak")
     dt_recap_loc <- rbindlist(list(dt_recap_loc, df_loc[,..l]), fill=TRUE)
   }
   

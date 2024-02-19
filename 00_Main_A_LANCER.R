@@ -105,8 +105,6 @@ table(filo_merged$DEC_D220)
 
 
 
-
-
 ################################################################################
 ########################### BROUILLON EN DESSOUS ###############################
 ################################################################################
@@ -128,9 +126,23 @@ dt_recap
 
 dt_recap <- ajout_label_variables_filosofi(dt_recap)
 
-l <- c("Estimate", 'pvalue', 'variable_label')
+l <- c("Estimate", 'pvalue', 'variable_label', "pval_weak")
 
 dt_recap[,..l]
+
+#Weak instruments : pval très faible = on rejette HO = "l'instrument est faible" ==> OUF
+# Wu-Hausman : pval très faible = on rejette HO = "OLS et IV sont également consistant" ==> OUF : on y gagne avec l'IV !!!
+# Sargan : Uniquement dans le cas où on a plusieurs IV
+
+
+
+# This presentation provides a decent overview with worked examples.
+# 
+# Weak instruments means that the instrument has a low correlation with the endogenous explanatory variable. This could result in a larger variance in the coefficient, and severe finite-sample bias. "The cure can be worse than the disease" (Bound, Jaeger, Baker, 1993/1995). See here for more details. From the help file for AER, it says it does an F-test on the first stage regression; I believe the null is that the instrument is weak. For the model you report, the null is rejected, so you can move forward with the assumption that the instrument is sufficiently strong.
+# 
+# Wu-Hausman tests that IV is just as consistent as OLS, and since OLS is more efficient, it would be preferable. The null here is that they are equally consistent; in this output, Wu-Hausman is significant at the p<0.1 level, so if you are OK with that confidence level, that would mean IV is consistent and OLS is not.
+# 
+# Sargan tests overidentification restrictions. The idea is that if you have more than one instrument per endogenous variable, the model is overidentified, and you have some excess information. All of the instruments must be valid for the inferences to be correct. So it tests that all exogenous instruments are in fact exogenous, and uncorrelated with the model residuals. If it is significant, it means that you don't have valid instruments (somewhere in there, as this is a global test). In this case, this isn't a concern. This can get more complex, and researchers have suggested doing further analysis (see this).
 
 # ########## Puis les stats des à compléter.... ##########
 # 
