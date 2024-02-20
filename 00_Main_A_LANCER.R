@@ -6,8 +6,8 @@
 #### PACKAGES, PARAMETRES ET DOSSIERS ==========================================
 ################################################################################
 
-repgen <- "C:/Users/Benjamin/Desktop/Ensae/3A-M2/Projet_DSSS" # Benjamin
-# repgen <- "~/Desktop/R/Projet_DSSS" # Tanguy
+# repgen <- "C:/Users/Benjamin/Desktop/Ensae/3A-M2/Projet_DSSS" # Benjamin
+repgen <- "~/Desktop/R/Projet_DSSS" # Tanguy
 utiliser_filo_merged_sauvegardee <- TRUE # FALSE pour créer la base, TRUE pour charger filo_merged déjà créée (pour gagner du temps si on relance le prbm)
 
 dist_rayon <- 500 # Rayon = 500m vol d'oiseau
@@ -126,7 +126,7 @@ dt_recap
 
 dt_recap <- ajout_label_variables_filosofi(dt_recap)
 
-l <- c("Estimate", 'pvalue', 'variable_label', "pval_weak")
+l <- c("Estimate", 'pvalue', 'variable_label', "pval_weak", "pval_WH")
 
 dt_recap[,..l]
 
