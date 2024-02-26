@@ -6,8 +6,8 @@
 #### PACKAGES, PARAMETRES ET DOSSIERS ==========================================
 ################################################################################
 
-repgen <- "C:/Users/Benjamin/Desktop/Ensae/3A-M2/Projet_DSSS" # Benjamin
-# repgen <- "~/Desktop/R/Projet_DSSS" # Tanguy
+# repgen <- "C:/Users/Benjamin/Desktop/Ensae/3A-M2/Projet_DSSS" # Benjamin
+repgen <- "~/Desktop/R/Projet_DSSS" # Tanguy
 utiliser_filo_merged_sauvegardee <- TRUE # FALSE pour créer la base, TRUE pour charger filo_merged déjà créée (pour gagner du temps si on relance le prbm)
 
 dist_rayon <- 500 # Rayon = 500m vol d'oiseau
@@ -116,6 +116,28 @@ print(xtable(dt_recap[,..l]), include.rownames=FALSE)
 
 l <- c("variable_label","pval_weak", "pval_WH")
 print(xtable(dt_recap[,..l]), include.rownames=FALSE)
+
+
+# Ajustements des p-value pour test Wu-Hausman (pas d'intérêt pour weak instruments étant donné pval < 10e-13) pour 
+
+dt_recap_WH <- dt_recap[ , c("Estimate", "pval_WH", "variable", "Annees", "variable_label"), with = TRUE]
+colnames(dt_recap_WH)[2] <- "pvalue"
+dt_recap_WH <- Ajout_pval_BH(dt_recap_WH, alpha)
+dt_recap_WH <- Ajout_pval_Bonf(dt_recap_WH, alpha)
+l <- c("variable_label", 'pvalue', "pval_Bonf", "pval_BH")
+print(xtable(dt_recap_WH[,..l]), include.rownames = FALSE)
+  
+# Tracés
+titre <- "pvalue et significativité\nau sens de la procédure de Benjamini-Hochberg"
+titre_save <- paste(repo_sorties, "Trace_IV_pval_WH_cor_BH.pdf", sep = "/")
+scale_y <- "identity" # identity ou log10 pour l'axe y
+trace_pval_BH(dt_recap_WH, alpha, titre_save, titre, scale_y)
+
+titre <- "pvalue et significativité\nau sens de la procédure de Bonferroni"
+titre_save <- paste(repo_sorties, "Trace_IV_pval_WH_cor_Bonf.pdf", sep = "/")
+scale_y <- "identity" # identity ou log10 pour l'axe y
+trace_pval_Bonf(dt_recap_WH, alpha, titre_save, titre, scale_y)
+
 
 # Weak instruments : pval très faible = on rejette HO = "l'instrument est faible" ==> OUF
 # Wu-Hausman : pval très faible = on rejette HO = "OLS et IV sont également consistant" ==> OUF : on y gagne avec l'IV !!!
