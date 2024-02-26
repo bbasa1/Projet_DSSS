@@ -6,8 +6,8 @@
 #### PACKAGES, PARAMETRES ET DOSSIERS ==========================================
 ################################################################################
 
-# repgen <- "C:/Users/Benjamin/Desktop/Ensae/3A-M2/Projet_DSSS" # Benjamin
-repgen <- "~/Desktop/R/Projet_DSSS" # Tanguy
+repgen <- "C:/Users/Benjamin/Desktop/Ensae/3A-M2/Projet_DSSS" # Benjamin
+# repgen <- "~/Desktop/R/Projet_DSSS" # Tanguy
 utiliser_filo_merged_sauvegardee <- TRUE # FALSE pour créer la base, TRUE pour charger filo_merged déjà créée (pour gagner du temps si on relance le prbm)
 
 dist_rayon <- 500 # Rayon = 500m vol d'oiseau
@@ -100,25 +100,10 @@ mean(filo_merged[beneficiaire == 1]$DEC_D212, na.rm = TRUE) - mean(filo_merged[b
 table(filo_merged$DEC_D220)
 
 
-
-
-
-
-
 ################################################################################
-########################### BROUILLON EN DESSOUS ###############################
+########################### ANALYSE PAR IV  ###########{{{{{####################
 ################################################################################
-
-# Avec nouvelle variable instru (il y a un bug qq part)
-nrow(filo_merged)
-data_loc <- copy(filo_merged)
-nrow(data_loc)
-
-data_loc2 <- Variable_distance_aeroport(data_loc)
-nrow(data_loc2)
-
-data_loc <- copy(data_loc2)
-
+data_loc <- Variable_distance_aeroport(copy(filo_merged))
 dt_recap <- Faire_regression_IV_aeroport_evolution_traitement(data_loc2, liste_var_reg_12_20, liste_var_reg_13_20, Ponderer_regression)
 
 dt_recap
@@ -126,15 +111,13 @@ dt_recap
 
 dt_recap <- ajout_label_variables_filosofi(dt_recap)
 
-l <- c("Estimate", 'pvalue', 'variable_label', "pval_weak", "pval_WH")
+l <- c("variable_label", "Estimate", 'pvalue', "pval_weak", "pval_WH")
+print(xtable(dt_recap[,..l]), include.rownames=FALSE)
 
-dt_recap[,..l]
 
 #Weak instruments : pval très faible = on rejette HO = "l'instrument est faible" ==> OUF
 # Wu-Hausman : pval très faible = on rejette HO = "OLS et IV sont également consistant" ==> OUF : on y gagne avec l'IV !!!
 # Sargan : Uniquement dans le cas où on a plusieurs IV
-
-
 
 # This presentation provides a decent overview with worked examples.
 # 
@@ -143,6 +126,12 @@ dt_recap[,..l]
 # Wu-Hausman tests that IV is just as consistent as OLS, and since OLS is more efficient, it would be preferable. The null here is that they are equally consistent; in this output, Wu-Hausman is significant at the p<0.1 level, so if you are OK with that confidence level, that would mean IV is consistent and OLS is not.
 # 
 # Sargan tests overidentification restrictions. The idea is that if you have more than one instrument per endogenous variable, the model is overidentified, and you have some excess information. All of the instruments must be valid for the inferences to be correct. So it tests that all exogenous instruments are in fact exogenous, and uncorrelated with the model residuals. If it is significant, it means that you don't have valid instruments (somewhere in there, as this is a global test). In this case, this isn't a concern. This can get more complex, and researchers have suggested doing further analysis (see this).
+
+
+################################################################################
+########################### BROUILLON EN DESSOUS ###############################
+################################################################################
+
 
 # ########## Puis les stats des à compléter.... ##########
 # 
