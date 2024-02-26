@@ -111,11 +111,13 @@ dt_recap
 
 dt_recap <- ajout_label_variables_filosofi(dt_recap)
 
-l <- c("variable_label", "Estimate", 'pvalue', "pval_weak", "pval_WH")
+l <- c("variable_label", "Estimate", 'pvalue')
 print(xtable(dt_recap[,..l]), include.rownames=FALSE)
 
+l <- c("variable_label","pval_weak", "pval_WH")
+print(xtable(dt_recap[,..l]), include.rownames=FALSE)
 
-#Weak instruments : pval très faible = on rejette HO = "l'instrument est faible" ==> OUF
+# Weak instruments : pval très faible = on rejette HO = "l'instrument est faible" ==> OUF
 # Wu-Hausman : pval très faible = on rejette HO = "OLS et IV sont également consistant" ==> OUF : on y gagne avec l'IV !!!
 # Sargan : Uniquement dans le cas où on a plusieurs IV
 
