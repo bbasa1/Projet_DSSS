@@ -52,8 +52,11 @@ for(annee in 2012:2020){
   pop_loc <- pop_loc[substr(as.character(IRIS), 1, 2) %in% liste_dep_idf]
   # filo_loc_comm <- filo_loc_comm[substr(as.character(CODGEO), 1, 2) %in% liste_dep_idf]
   
-  txt <- paste("pop_loc <- pop_loc[, .(IRIS, P", substr(as.character(annee), 3, 4), "_POP, TYP_IRIS)]", sep = "") # Si on veut rajouter d'autres renseignements démo on pourra le faire là ensuite
-  eval(parse(text = txt))
+  # liste_var_demographie <- c("POP", "POP0014", "POP1529",	"POP3044",	"POP4559","POP6074","POP75P") (ex P14_)
+  prefix_demo <- paste("P", substr(as.character(annee), 3, 4), sep = "")
+  liste_var_demographie_loc <- paste(prefix_demo, liste_var_demographie, sep = "_")
+  liste_var_demographie_loc <- append(liste_var_demographie_loc, c("IRIS", "TYP_IRIS"))
+  pop_loc <- pop_loc[,..liste_var_demographie_loc]
 
   setnames(pop_loc, 'TYP_IRIS', paste('TYP_IRIS_', substr(as.character(annee), 3, 4), sep = ""))
   filo_loc_merged <- merge(filo_loc, pop_loc, by = 'IRIS', all = TRUE)

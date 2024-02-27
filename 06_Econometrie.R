@@ -56,7 +56,7 @@ Faire_regression_evolution_traitement <- function(data_loc, liste_var_reg_12_20,
 
 # Pas testé ni fini (probablement)
 
-Faire_regression_IV_aeroport_evolution_traitement <- function(data_loc, liste_var_reg_12_20, liste_var_reg_13_20, Ponderer_regression = FALSE){
+Faire_regression_IV_aeroport_evolution_traitement <- function(data_loc, liste_var_reg_12_20, liste_var_reg_13_20, Ponderer_regression = FALSE, liste_var_demographie){
   # Fait toutes les régressions linéaire de la forme X = Traitement, Y = Evolution des var socio-eco
   
   # Création d'un data.tabla vierge pour stocker les résultats, en particulier les tests propres aux régressions IV (test de qualité de l'instrument, test de Wu-Hausman)
@@ -120,8 +120,38 @@ Faire_regression_IV_aeroport_evolution_traitement <- function(data_loc, liste_va
     l <- c("Estimate", "pvalue", "variable", "pval_weak", "pval_WH")
     dt_recap_loc <- rbindlist(list(dt_recap_loc, df_loc[,..l]), fill=TRUE)
   }
-  
   dt_recap_loc[is.na(Annees), Annees := "2013 - 2020"]
+  
+  
+  
+  for(var in liste_var_demographie){# Puis les variables qui n'existent qu'après 2013
+    var_20 <- paste("P20", var, sep = "_")
+    var_12 <- paste("P12", var, sep = "_")
+
+    data_loc[, Evolution := get(var_20) - get(var_12)]
+    
+    if(Ponderer_regression){
+      model <- ivreg(Evolution ~ beneficiaire | distance_aeroport, data = data_loc[TYP_IRIS_20 == 'H'], weights = P20_POP) 
+    }else{
+      model <- ivreg(Evolution ~ beneficiaire | distance_aeroport, data = data_loc[TYP_IRIS_20 == 'H'])
+    }
+    
+    df_loc <- as.data.table(summary(model)$coefficients)[2,]
+    setnames(df_loc, "Pr(>|t|)", "pvalue")
+    df_loc$variable <- var
+    
+    df_loc_weak <- as.data.table(summary(model)$diagnostics)[1,]
+    df_loc$pval_weak <- df_loc_weak$`p-value`
+    
+    df_loc_WH <- as.data.table(summary(model)$diagnostics)[2,]
+    df_loc$pval_WH <- df_loc_WH$`p-value`
+    
+    l <- c("Estimate", "pvalue", "variable", "pval_weak", "pval_WH")
+    dt_recap_loc <- rbindlist(list(dt_recap_loc, df_loc[,..l]), fill=TRUE)
+  }
+  dt_recap_loc[is.na(Annees), Annees := "2012 - 2020 (Démo)"]
+  
+  
   return(dt_recap_loc)
 }
 

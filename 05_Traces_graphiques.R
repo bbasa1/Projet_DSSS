@@ -61,7 +61,15 @@ ajout_label_variables_filosofi <- function(data_loc){
       variable == "DEC_D9", "9e décile (€)",
       variable == "DEC_RD", "Rapport interdécile D9/D1",
       variable == "DEC_S80S20", "S80/S20",
-      variable == "DEC_PAUT", "Part des autres revenus (%)"
+      variable == "DEC_PAUT", "Part des autres revenus (%)",
+      variable == "POP", "Population",
+      variable == "POP0014", "Population 0-14 ans",
+      variable == "POP1529", "Population 15-29 ans",
+      variable == "POP3044", "Population 30-44 ans",
+      variable == "POP4559", "Population 45-59 ans",
+      variable == "POP6074", "Population 60-74 ans",
+      variable == "POP75P", "Population >= 75 ans"
+      
       
     )
   )
