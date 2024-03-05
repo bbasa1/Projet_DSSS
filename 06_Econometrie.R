@@ -4,7 +4,7 @@
 ################################################################################
 ################################################################################
 
-Faire_regression_evolution_traitement <- function(data_loc, liste_var_reg_12_20, liste_var_reg_13_20, Ponderer_regression = FALSE){
+Faire_regression_evolution_traitement <- function(data_loc, liste_var_reg_12_20, liste_var_reg_13_20, Ponderer_regression = FALSE, liste_var_demographie){
   # Fait toutes les régressions linéaire de la forme X = Traitement, Y = Evolution des var socio-eco
   
   # Création d'un data.tabla vierge pour stocker les résultats
@@ -47,14 +47,28 @@ Faire_regression_evolution_traitement <- function(data_loc, liste_var_reg_12_20,
     l <- c("Estimate", "pvalue", "variable")
     dt_recap_loc <- rbindlist(list(dt_recap_loc, df_loc[,..l]), fill=TRUE)
   }
-  
   dt_recap_loc[is.na(Annees), Annees := "2013 - 2020"]
+  
+  
+  for(var in liste_var_demographie){# Puis les variables qui n'existent qu'après 2013
+    var_20 <- paste("P20", var, sep = "_")
+    var_12 <- paste("P12", var, sep = "_")
+    
+    data_loc[, Evolution := get(var_20) - get(var_12)]
+    model <- lm(Evolution ~ beneficiaire, data = data_loc[TYP_IRIS_20 == 'H'], weights = P20_POP, na.action=na.exclude)
+    df_loc <- as.data.table(summary(model)$coefficients)[2,]
+    setnames(df_loc, "Pr(>|t|)", "pvalue")
+    df_loc$variable <- var
+    l <- c("Estimate", "pvalue", "variable")
+    dt_recap_loc <- rbindlist(list(dt_recap_loc, df_loc[,..l]), fill=TRUE)
+  }
+  dt_recap_loc[is.na(Annees), Annees := "2012 - 2020 (Démo)"]
+  
+  
   return(dt_recap_loc)
 }
 
 
-
-# Pas testé ni fini (probablement)
 
 Faire_regression_IV_aeroport_evolution_traitement <- function(data_loc, liste_var_reg_12_20, liste_var_reg_13_20, Ponderer_regression = FALSE, liste_var_demographie){
   # Fait toutes les régressions linéaire de la forme X = Traitement, Y = Evolution des var socio-eco
@@ -65,7 +79,8 @@ Faire_regression_IV_aeroport_evolution_traitement <- function(data_loc, liste_va
                              variable = character(),
                              Annees = character(),
                              pval_weak = numeric(), #weak instrument test
-                             pval_WH = numeric()) #Wu-Hausman test
+                             pval_WH = numeric(),
+                             std_error = numeric()) 
   
   
   for(var in liste_var_reg_12_20){ # Les variables évolutions 2012 --> 2020
@@ -79,18 +94,19 @@ Faire_regression_IV_aeroport_evolution_traitement <- function(data_loc, liste_va
       model <- ivreg(Evolution ~ beneficiaire | distance_aeroport, data = data_loc[TYP_IRIS_20 == 'H'], weights = P20_POP) 
     }else{
       model <- ivreg(Evolution ~ beneficiaire | distance_aeroport, data = data_loc[TYP_IRIS_20 == 'H'])
-      model_lin <- lm(Evolution ~ beneficiaire, data = data_loc[TYP_IRIS_20 == 'H']) #Inutile (pas utilisé ailleurs)?
+      # model_lin <- lm(Evolution ~ beneficiaire, data = data_loc[TYP_IRIS_20 == 'H']) #Inutile (pas utilisé ailleurs)?
     }
 
     df_loc <- as.data.table(summary(model)$coefficients)[2,]
     setnames(df_loc, "Pr(>|t|)", "pvalue")
+    setnames(df_loc, "Std. Error", "std_error")
     df_loc$variable <- var
     df_loc_weak <- as.data.table(summary(model)$diagnostics)[1,]
     df_loc$pval_weak <- df_loc_weak$`p-value`
     df_loc_WH <- as.data.table(summary(model)$diagnostics)[2,]
     df_loc$pval_WH <- df_loc_WH$`p-value`
     
-    l <- c("Estimate", "pvalue", "variable", "pval_weak", "pval_WH")
+    l <- c("Estimate", "pvalue", "variable", "pval_weak", "pval_WH", "std_error")
     dt_recap_loc <- rbindlist(list(dt_recap_loc, df_loc[,..l]), fill=TRUE)
   }
   dt_recap_loc$Annees <- "2012 - 2020"
@@ -109,6 +125,7 @@ Faire_regression_IV_aeroport_evolution_traitement <- function(data_loc, liste_va
     
     df_loc <- as.data.table(summary(model)$coefficients)[2,]
     setnames(df_loc, "Pr(>|t|)", "pvalue")
+    setnames(df_loc, "Std. Error", "std_error")
     df_loc$variable <- var
 
     df_loc_weak <- as.data.table(summary(model)$diagnostics)[1,]
@@ -117,7 +134,7 @@ Faire_regression_IV_aeroport_evolution_traitement <- function(data_loc, liste_va
     df_loc_WH <- as.data.table(summary(model)$diagnostics)[2,]
     df_loc$pval_WH <- df_loc_WH$`p-value`
     
-    l <- c("Estimate", "pvalue", "variable", "pval_weak", "pval_WH")
+    l <- c("Estimate", "pvalue", "variable", "pval_weak", "pval_WH", "std_error")
     dt_recap_loc <- rbindlist(list(dt_recap_loc, df_loc[,..l]), fill=TRUE)
   }
   dt_recap_loc[is.na(Annees), Annees := "2013 - 2020"]
@@ -138,6 +155,7 @@ Faire_regression_IV_aeroport_evolution_traitement <- function(data_loc, liste_va
     
     df_loc <- as.data.table(summary(model)$coefficients)[2,]
     setnames(df_loc, "Pr(>|t|)", "pvalue")
+    setnames(df_loc, "Std. Error", "std_error")
     df_loc$variable <- var
     
     df_loc_weak <- as.data.table(summary(model)$diagnostics)[1,]
@@ -146,7 +164,7 @@ Faire_regression_IV_aeroport_evolution_traitement <- function(data_loc, liste_va
     df_loc_WH <- as.data.table(summary(model)$diagnostics)[2,]
     df_loc$pval_WH <- df_loc_WH$`p-value`
     
-    l <- c("Estimate", "pvalue", "variable", "pval_weak", "pval_WH")
+    l <- c("Estimate", "pvalue", "variable", "pval_weak", "pval_WH", "std_error")
     dt_recap_loc <- rbindlist(list(dt_recap_loc, df_loc[,..l]), fill=TRUE)
   }
   dt_recap_loc[is.na(Annees), Annees := "2012 - 2020 (Démo)"]

@@ -60,7 +60,7 @@ table(filo_merged$beneficiaire) # On a 67 IRIS bénéficiaires pour 69 gares
 
 # Les régressions
 data_loc <- copy(filo_merged)
-dt_recap <- Faire_regression_evolution_traitement(data_loc, liste_var_reg_12_20, liste_var_reg_13_20, Ponderer_regression)
+dt_recap <- Faire_regression_evolution_traitement(data_loc, liste_var_reg_12_20, liste_var_reg_13_20, Ponderer_regression, liste_var_demographie)
   
 # Calcul des pvalues, mise en forme
 alpha <- 0.1
@@ -72,7 +72,7 @@ dt_recap <- ajout_label_variables_filosofi(data_loc)
   
 
 l <- c("variable_label", "pval_BH","pval_Bonf", "Estimate")
-xtable(dt_recap[,..l])
+print(xtable(dt_recap[,..l]), include.rownames= FALSE)
 dt_recap[,..l]
 
 # Tracés
@@ -88,16 +88,16 @@ trace_pval_Bonf(dt_recap, alpha, titre_save, titre, scale_y)
 
 
 
-############ QQ VERIFS
-mean(filo_merged[beneficiaire == 1]$DEC_D220 - filo_merged[beneficiaire == 1]$DEC_D212, na.rm = TRUE)
-mean(filo_merged[beneficiaire == 0]$DEC_D220 - filo_merged[beneficiaire == 0]$DEC_D212, na.rm = TRUE)
-
-mean(filo_merged[beneficiaire == 1]$DEC_D220, na.rm = TRUE) - mean(filo_merged[beneficiaire == 0 & substr(IRIS, 1, 2) != "75"]$DEC_D220, na.rm = TRUE)
-mean(filo_merged[beneficiaire == 1]$DEC_D220, na.rm = TRUE) - mean(filo_merged[beneficiaire == 0]$DEC_D220, na.rm = TRUE)
-mean(filo_merged[beneficiaire == 1]$DEC_D212, na.rm = TRUE) - mean(filo_merged[beneficiaire == 0]$DEC_D212, na.rm = TRUE)
-
-
-table(filo_merged$DEC_D220)
+# ############ QQ VERIFS
+# mean(filo_merged[beneficiaire == 1]$DEC_D220 - filo_merged[beneficiaire == 1]$DEC_D212, na.rm = TRUE)
+# mean(filo_merged[beneficiaire == 0]$DEC_D220 - filo_merged[beneficiaire == 0]$DEC_D212, na.rm = TRUE)
+# 
+# mean(filo_merged[beneficiaire == 1]$DEC_D220, na.rm = TRUE) - mean(filo_merged[beneficiaire == 0 & substr(IRIS, 1, 2) != "75"]$DEC_D220, na.rm = TRUE)
+# mean(filo_merged[beneficiaire == 1]$DEC_D220, na.rm = TRUE) - mean(filo_merged[beneficiaire == 0]$DEC_D220, na.rm = TRUE)
+# mean(filo_merged[beneficiaire == 1]$DEC_D212, na.rm = TRUE) - mean(filo_merged[beneficiaire == 0]$DEC_D212, na.rm = TRUE)
+# 
+# 
+# table(filo_merged$DEC_D220)
 
 
 ################################################################################
@@ -105,14 +105,16 @@ table(filo_merged$DEC_D220)
 ################################################################################
 data_loc <- Variable_distance_aeroport(copy(filo_merged))
 dt_recap <- Faire_regression_IV_aeroport_evolution_traitement(data_loc, liste_var_reg_12_20, liste_var_reg_13_20, Ponderer_regression, liste_var_demographie)
-
-dt_recap
-
-
 dt_recap <- ajout_label_variables_filosofi(dt_recap)
+dt_recap$Estimate_min <- dt_recap$Estimate - 1.96*dt_recap$std_error
+dt_recap$Estimate_max <- dt_recap$Estimate + 1.96*dt_recap$std_error
 
-l <- c("variable_label", "Estimate", 'pvalue')
-print(xtable(dt_recap[,..l]), include.rownames=FALSE)
+dt_recap$Estimate_95 <- paste("[", round(dt_recap$Estimate_min, 2), " ; ", round(dt_recap$Estimate_max, 2), "]", sep = "")
+
+l <- c("variable_label", "Estimate_min", "Estimate_max","Estimate_95", 'pvalue')
+l <- c("variable_label","Estimate_95", 'pvalue')
+dt_recap[,..l][order(pvalue)]
+print(xtable(dt_recap[,..l][order(pvalue)]), include.rownames=FALSE)
 
 l <- c("variable_label","pval_weak", "pval_WH")
 print(xtable(dt_recap[,..l]), include.rownames=FALSE)
