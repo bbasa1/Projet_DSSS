@@ -101,7 +101,7 @@ trace_pval_Bonf(dt_recap, alpha, titre_save, titre, scale_y)
 
 
 ################################################################################
-########################### ANALYSE PAR IV  ###########{{{{{####################
+########################### ANALYSE PAR IV  ####################################
 ################################################################################
 data_loc <- Variable_distance_aeroport(copy(filo_merged))
 dt_recap <- Faire_regression_IV_aeroport_evolution_traitement(data_loc, liste_var_reg_12_20, liste_var_reg_13_20, Ponderer_regression, liste_var_demographie)
@@ -155,9 +155,83 @@ trace_pval_Bonf(dt_recap_WH, alpha, titre_save, titre, scale_y)
 
 
 ################################################################################
+########################### AVEC LES ELECTIONS   ###############################
+################################################################################
+liste_dep_idf <- c('75', '77', '78', '91', '92', '93', '94', '95')
+
+leg2007comm <- as.data.table(read.csv(paste(repo_data, "leg2007comm.csv", sep = "/"), header = TRUE, sep="," ))
+
+leg2007comm <- leg2007comm[dep %in% liste_dep_idf]
+
+# pvoixAUG    pvoixPCF   pvoixPS    pvoixRDG    pvoixDVG   pvoixVEC    pvoixECO    pvoixDIV pvoixCPNT  pvoixUDFD
+# pvoixUMP   pvoixDVD    pvoixMPF    pvoixFN    pvoixAUD
+
+liste_partis_opposition <- c('pvoixAUG','pvoixPCF','pvoixPS','pvoixRDG','pvoixDVG','pvoixVEC','pvoixECO','pvoixUDFD','pvoixDIV','pvoixMPF','pvoixFN','pvoixAUD')
+
+liste_partis_majorite <- c('pvoixDIV', 'pvoixUMP', 'pvoixDVD')
+
+
+# Tot = 15
+length(liste_partis_opposition)
+
+
+liste_tot_rows <-  append(c("codecommune"), liste_partis_opposition)
+liste_tot_rows <- append(liste_tot_rows, liste_partis_majorite)
+leg2007comm[, pvoixOPPOS := rowSums(.SD, na.rm=T),.SDcols=liste_partis_opposition]
+leg2007comm[, pvoixMAJO := rowSums(.SD, na.rm=T),.SDcols=liste_partis_majorite]
+
+
+
+leg2007comm
+filo_merged[, codecommune := substring(IRIS, 1, 5)]
+
+
+l <- c("pvoixOPPOS", "pvoixMAJO", "codecommune")
+filo_merged <- merge(filo_merged, leg2007comm[,..l], by = "codecommune", all.x = TRUE)
+
+
+data_loc <- copy(filo_merged)
+dt_recap <- Faire_regression_IV_legislatives_evolution_traitement(data_loc, liste_var_reg_12_20, liste_var_reg_13_20, Ponderer_regression, liste_var_demographie)
+dt_recap <- ajout_label_variables_filosofi(dt_recap)
+dt_recap$Estimate_min <- dt_recap$Estimate - 1.96*dt_recap$std_error
+dt_recap$Estimate_max <- dt_recap$Estimate + 1.96*dt_recap$std_error
+
+dt_recap$Estimate_95 <- paste("[", round(dt_recap$Estimate_min, 2), " ; ", round(dt_recap$Estimate_max, 2), "]", sep = "")
+
+l <- c("variable_label", "Estimate_min", "Estimate_max","Estimate_95", 'pvalue')
+l <- c("variable_label","Estimate_95", 'pvalue')
+dt_recap[,..l][order(pvalue)]
+print(xtable(dt_recap[,..l][order(pvalue)]), include.rownames=FALSE)
+
+l <- c("variable_label","pval_weak", "pval_WH")
+print(xtable(dt_recap[,..l]), include.rownames=FALSE)
+
+  
+
+cor(filo_merged$pvoixOPPOS, filo_merged$beneficiaire)
+
+
+################################################################################
 ########################### BROUILLON EN DESSOUS ###############################
 ################################################################################
 
+
+# sous_leg2007comm <- copy(leg2007comm[,..liste_tot_rows])
+
+# 100*colMeans(sous_leg2007comm[,..liste_partis_opposition])
+# 100*colMeans(sous_leg2007comm[,..liste_partis_majorite])
+
+
+
+# leg2007comm[, pVERIF_pvoix := pvoixOPPOS + pvoixMAJO]
+# 
+# l <- c("nomcommune","pVERIF_pvoix", "pvoixOPPOS", "pvoixMAJO", "inscrits", "votants", "exprimes")
+# leg2007comm[,..l]
+# max(leg2007comm$VERIF_pvoix)
+# 
+# leg2007comm[,..liste_tot_rows]
+# 
+# leg2007comm[VERIF_pvoix >= 1.15]
 
 # ########## Puis les stats des à compléter.... ##########
 # 
