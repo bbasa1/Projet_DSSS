@@ -25,6 +25,8 @@ source(paste(repo_prgm , "04_IRIS_Traites_et_temoins.R" , sep = "/"))
 source(paste(repo_prgm , "05_Traces_graphiques.R" , sep = "/"))
 source(paste(repo_prgm , "06_Econometrie.R" , sep = "/"))
 
+modeliser_relatif <- FALSE
+
 
 liste_var_reg_12_20 <- c("DEC_TP60","DEC_MED","DEC_D1", "DEC_D2", "DEC_D3", "DEC_D4", "DEC_D6", "DEC_D7", "DEC_D8", "DEC_D9",
                          "DEC_RD", "DEC_PCHO", "DEC_PPEN", "DEC_PAUT")
@@ -104,7 +106,7 @@ trace_pval_Bonf(dt_recap, alpha, titre_save, titre, scale_y)
 ########################### ANALYSE PAR IV  ####################################
 ################################################################################
 data_loc <- Variable_distance_aeroport(copy(filo_merged))
-dt_recap <- Faire_regression_IV_aeroport_evolution_traitement(data_loc, liste_var_reg_12_20, liste_var_reg_13_20, Ponderer_regression, liste_var_demographie)
+dt_recap <- Faire_regression_IV_aeroport_evolution_traitement(data_loc, liste_var_reg_12_20, liste_var_reg_13_20, Ponderer_regression, liste_var_demographie, modeliser_relatif = modeliser_relatif)
 dt_recap <- ajout_label_variables_filosofi(dt_recap)
 dt_recap$Estimate_min <- dt_recap$Estimate - 1.96*dt_recap$std_error
 dt_recap$Estimate_max <- dt_recap$Estimate + 1.96*dt_recap$std_error
@@ -140,6 +142,7 @@ titre_save <- paste(repo_sorties, "Trace_IV_pval_WH_cor_Bonf.pdf", sep = "/")
 scale_y <- "identity" # identity ou log10 pour l'axe y
 trace_pval_Bonf(dt_recap_WH, alpha, titre_save, titre, scale_y)
 
+dt_recap_copy <- copy(dt_recap)
 
 # Weak instruments : pval très faible = on rejette HO = "l'instrument est faible" ==> OUF
 # Wu-Hausman : pval très faible = on rejette HO = "OLS et IV sont également consistant" ==> OUF : on y gagne avec l'IV !!!
@@ -191,7 +194,7 @@ filo_merged <- merge(filo_merged, leg2007comm[,..l], by = "codecommune", all.x =
 
 
 data_loc <- copy(filo_merged)
-dt_recap <- Faire_regression_IV_legislatives_evolution_traitement(data_loc, liste_var_reg_12_20, liste_var_reg_13_20, Ponderer_regression, liste_var_demographie)
+dt_recap <- Faire_regression_IV_legislatives_evolution_traitement(data_loc, liste_var_reg_12_20, liste_var_reg_13_20, Ponderer_regression, liste_var_demographie, modeliser_relatif = modeliser_relatif)
 dt_recap <- ajout_label_variables_filosofi(dt_recap)
 dt_recap$Estimate_min <- dt_recap$Estimate - 1.96*dt_recap$std_error
 dt_recap$Estimate_max <- dt_recap$Estimate + 1.96*dt_recap$std_error
@@ -211,12 +214,60 @@ print(xtable(dt_recap[,..l]), include.rownames=FALSE)
 cor(filo_merged$pvoixOPPOS, filo_merged$beneficiaire)
 
 
+dt_recap_merged <- merge(dt_recap_copy, dt_recap, by = c("variable", "variable_label"), suffixes = c("_Distance","_Elections"))
+
+l <- c("variable_label", "Estimate_Distance", "Estimate_Elections", "std_error_Distance", "std_error_Elections")
+dt_recap_merged[pvalue_Distance <= 0.10 & pvalue_Elections <= 0.10][,..l]
 ################################################################################
 ########################### BROUILLON EN DESSOUS ###############################
 ################################################################################
 
-
-# sous_leg2007comm <- copy(leg2007comm[,..liste_tot_rows])
+# 
+# # Création d'un data.tabla vierge pour stocker les résultats, en particulier les tests propres aux régressions IV (test de qualité de l'instrument, test de Wu-Hausman)
+# dt_recap_loc <- data.table(Estimate = numeric(),
+#                            pvalue = numeric(),
+#                            variable = character(),
+#                            Annees = character(),
+#                            pval_weak = numeric(), #weak instrument test
+#                            pval_WH = numeric(),
+#                            std_error = numeric()) 
+# 
+# 
+# for(var in liste_var_reg_12_20){ # Les variables évolutions 2012 --> 2020
+#   var_20 <- paste(var, "20", sep = "")
+#   var_12 <- paste(var, "12", sep = "")
+#   
+#   
+#   data_loc[get(var_12) != 0, Evolution := 100*(get(var_20) - get(var_12))/get(var_12)]
+#   data_loc[get(var_12) == 0, Evolution := NaN]
+#   
+#   # Est-ce qu'on pondère la regression ou non
+#   if(Ponderer_regression){
+#     model <- ivreg(Evolution ~ beneficiaire | pvoixOPPOS, data = data_loc[TYP_IRIS_20 == 'H'], weights = P20_POP) 
+#   }else{
+#     model <- ivreg(Evolution ~ beneficiaire | pvoixOPPOS, data = data_loc[TYP_IRIS_20 == 'H'])
+#     # model_lin <- lm(Evolution ~ beneficiaire, data = data_loc[TYP_IRIS_20 == 'H']) #Inutile (pas utilisé ailleurs)?
+#   }
+#   
+#   df_loc <- as.data.table(summary(model)$coefficients)[2,]
+#   setnames(df_loc, "Pr(>|t|)", "pvalue")
+#   setnames(df_loc, "Std. Error", "std_error")
+#   df_loc$variable <- var
+#   df_loc_weak <- as.data.table(summary(model)$diagnostics)[1,]
+#   df_loc$pval_weak <- df_loc_weak$`p-value`
+#   df_loc_WH <- as.data.table(summary(model)$diagnostics)[2,]
+#   df_loc$pval_WH <- df_loc_WH$`p-value`
+#   
+#   l <- c("Estimate", "pvalue", "variable", "pval_weak", "pval_WH", "std_error")
+#   dt_recap_loc <- rbindlist(list(dt_recap_loc, df_loc[,..l]), fill=TRUE)
+# }
+# dt_recap_loc$Annees <- "2012 - 2020"
+# dt_recap_loc
+# l <- c("variable","std_error", "Estimate")
+# dt_recap_copy[,..l]
+# 
+# dt_recap_loc_elections <- copy(dt_recap_loc)
+# # sous_leg2007comm <- copy(leg2007comm[,..liste_tot_rows])
 
 # 100*colMeans(sous_leg2007comm[,..liste_partis_opposition])
 # 100*colMeans(sous_leg2007comm[,..liste_partis_majorite])

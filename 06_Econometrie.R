@@ -70,7 +70,7 @@ Faire_regression_evolution_traitement <- function(data_loc, liste_var_reg_12_20,
 
 
 
-Faire_regression_IV_aeroport_evolution_traitement <- function(data_loc, liste_var_reg_12_20, liste_var_reg_13_20, Ponderer_regression = FALSE, liste_var_demographie){
+Faire_regression_IV_aeroport_evolution_traitement <- function(data_loc, liste_var_reg_12_20, liste_var_reg_13_20, Ponderer_regression = FALSE, liste_var_demographie, modeliser_relatif = FALSE){
   # Fait toutes les régressions linéaire de la forme X = Traitement, Y = Evolution des var socio-eco
   
   # Création d'un data.tabla vierge pour stocker les résultats, en particulier les tests propres aux régressions IV (test de qualité de l'instrument, test de Wu-Hausman)
@@ -87,8 +87,13 @@ Faire_regression_IV_aeroport_evolution_traitement <- function(data_loc, liste_va
     var_20 <- paste(var, "20", sep = "")
     var_12 <- paste(var, "12", sep = "")
     
-    data_loc[, Evolution := get(var_20) - get(var_12)]
-    
+    if(modeliser_relatif){
+      data_loc[get(var_12) != 0, Evolution := 100*(get(var_20) - get(var_12))/get(var_12)]
+      data_loc[get(var_12) == 0, Evolution := NaN]
+    }else{
+      data_loc[, Evolution := get(var_20) - get(var_12)]
+    }
+
     # Est-ce qu'on pondère la regression ou non
     if(Ponderer_regression){
       model <- ivreg(Evolution ~ beneficiaire | distance_aeroport, data = data_loc[TYP_IRIS_20 == 'H'], weights = P20_POP) 
@@ -115,7 +120,13 @@ Faire_regression_IV_aeroport_evolution_traitement <- function(data_loc, liste_va
     var_20 <- paste(var, "20", sep = "")
     var_12 <- paste(var, "13", sep = "")
     
-    data_loc[, Evolution := get(var_20) - get(var_12)]
+    if(modeliser_relatif){
+      data_loc[get(var_12) != 0, Evolution := 100*(get(var_20) - get(var_12))/get(var_12)]
+      data_loc[get(var_12) == 0, Evolution := NaN]
+    }else{
+      data_loc[, Evolution := get(var_20) - get(var_12)]
+    }
+    
     
     if(Ponderer_regression){
       model <- ivreg(Evolution ~ beneficiaire | distance_aeroport, data = data_loc[TYP_IRIS_20 == 'H'], weights = P20_POP) 
@@ -141,11 +152,17 @@ Faire_regression_IV_aeroport_evolution_traitement <- function(data_loc, liste_va
   
   
   
-  for(var in liste_var_demographie){# Puis les variables qui n'existent qu'après 2013
+  for(var in liste_var_demographie){# Puis les variables de démographie
     var_20 <- paste("P20", var, sep = "_")
     var_12 <- paste("P12", var, sep = "_")
 
-    data_loc[, Evolution := get(var_20) - get(var_12)]
+    if(modeliser_relatif){
+      data_loc[get(var_12) != 0, Evolution := 100*(get(var_20) - get(var_12))/get(var_12)]
+      data_loc[get(var_12) == 0, Evolution := NaN]
+    }else{
+      data_loc[, Evolution := get(var_20) - get(var_12)]
+    }
+    
     
     if(Ponderer_regression){
       model <- ivreg(Evolution ~ beneficiaire | distance_aeroport, data = data_loc[TYP_IRIS_20 == 'H'], weights = P20_POP) 
@@ -176,7 +193,7 @@ Faire_regression_IV_aeroport_evolution_traitement <- function(data_loc, liste_va
 
 
 
-Faire_regression_IV_legislatives_evolution_traitement <- function(data_loc, liste_var_reg_12_20, liste_var_reg_13_20, Ponderer_regression = FALSE, liste_var_demographie){
+Faire_regression_IV_legislatives_evolution_traitement <- function(data_loc, liste_var_reg_12_20, liste_var_reg_13_20, Ponderer_regression = FALSE, liste_var_demographie, modeliser_relatif = FALSE){
   # Fait toutes les régressions linéaire de la forme X = Traitement, Y = Evolution des var socio-eco
   
   # Création d'un data.tabla vierge pour stocker les résultats, en particulier les tests propres aux régressions IV (test de qualité de l'instrument, test de Wu-Hausman)
@@ -193,7 +210,12 @@ Faire_regression_IV_legislatives_evolution_traitement <- function(data_loc, list
     var_20 <- paste(var, "20", sep = "")
     var_12 <- paste(var, "12", sep = "")
     
-    data_loc[, Evolution := get(var_20) - get(var_12)]
+    if(modeliser_relatif){
+      data_loc[get(var_12) != 0, Evolution := 100*(get(var_20) - get(var_12))/get(var_12)]
+      data_loc[get(var_12) == 0, Evolution := NaN]
+    }else{
+      data_loc[, Evolution := get(var_20) - get(var_12)]
+    }
     
     # Est-ce qu'on pondère la regression ou non
     if(Ponderer_regression){
@@ -221,7 +243,12 @@ Faire_regression_IV_legislatives_evolution_traitement <- function(data_loc, list
     var_20 <- paste(var, "20", sep = "")
     var_12 <- paste(var, "13", sep = "")
     
-    data_loc[, Evolution := get(var_20) - get(var_12)]
+    if(modeliser_relatif){
+      data_loc[get(var_12) != 0, Evolution := 100*(get(var_20) - get(var_12))/get(var_12)]
+      data_loc[get(var_12) == 0, Evolution := NaN]
+    }else{
+      data_loc[, Evolution := get(var_20) - get(var_12)]
+    }
     
     if(Ponderer_regression){
       model <- ivreg(Evolution ~ beneficiaire | pvoixOPPOS, data = data_loc[TYP_IRIS_20 == 'H'], weights = P20_POP) 
@@ -251,7 +278,12 @@ Faire_regression_IV_legislatives_evolution_traitement <- function(data_loc, list
     var_20 <- paste("P20", var, sep = "_")
     var_12 <- paste("P12", var, sep = "_")
     
-    data_loc[, Evolution := get(var_20) - get(var_12)]
+    if(modeliser_relatif){
+      data_loc[get(var_12) != 0, Evolution := 100*(get(var_20) - get(var_12))/get(var_12)]
+      data_loc[get(var_12) == 0, Evolution := NaN]
+    }else{
+      data_loc[, Evolution := get(var_20) - get(var_12)]
+    }
     
     if(Ponderer_regression){
       model <- ivreg(Evolution ~ beneficiaire | pvoixOPPOS, data = data_loc[TYP_IRIS_20 == 'H'], weights = P20_POP) 
