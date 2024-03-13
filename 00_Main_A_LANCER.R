@@ -33,6 +33,11 @@ liste_var_reg_12_20 <- c("DEC_TP60","DEC_MED","DEC_D1", "DEC_D2", "DEC_D3", "DEC
 liste_var_reg_13_20 <- c("DEC_Q1", "DEC_Q3","DEC_S80S20", "DEC_GI", "DEC_PTSA", "DEC_PBEN")
 
 liste_var_demographie <- c("POP", "POP0014", "POP1529",	"POP3044",	"POP4559","POP6074","POP75P") # Le nom des variables sélectionnées dans démo, sans le préfix (ex P14_)
+
+liste_dep_idf <- c('75', '77', '78', '91', '92', '93', '94', '95')
+liste_partis_opposition <- c("pvoixDIV",'pvoixAUG','pvoixPCF','pvoixPS','pvoixRDG','pvoixDVG','pvoixVEC','pvoixECO','pvoixUDFD','pvoixDIV','pvoixMPF','pvoixFN','pvoixAUD')
+liste_partis_majorite <- c('pvoixUMP', 'pvoixDVD')
+
 ################################################################################
 #### CREATION ET IMPORT DE BASES ===============================================
 ################################################################################
@@ -105,15 +110,24 @@ trace_pval_Bonf(dt_recap, alpha, titre_save, titre, scale_y)
 ################################################################################
 ########################### ANALYSE PAR IV  ####################################
 ################################################################################
+
+## Distance à l'axe
 data_loc <- Variable_distance_aeroport(copy(filo_merged))
-dt_recap <- Faire_regression_IV_aeroport_evolution_traitement(data_loc, liste_var_reg_12_20, liste_var_reg_13_20, Ponderer_regression, liste_var_demographie, modeliser_relatif = modeliser_relatif)
-dt_recap <- ajout_label_variables_filosofi(dt_recap)
-dt_recap$Estimate_min <- dt_recap$Estimate - 1.96*dt_recap$std_error
-dt_recap$Estimate_max <- dt_recap$Estimate + 1.96*dt_recap$std_error
+var_instru <- "distance_aeroport"
+dt_recap <- Faire_regression_IV(data_loc,var_instru = var_instru,liste_var_reg_12_20, liste_var_reg_13_20, Ponderer_regression, liste_var_demographie, modeliser_relatif = modeliser_relatif, var_clustering = "LIBCOM")
 
-dt_recap$Estimate_95 <- paste("[", round(dt_recap$Estimate_min, 2), " ; ", round(dt_recap$Estimate_max, 2), "]", sep = "")
+l <- c("variable_label","Estimate_95", 'pvalue')
+dt_recap[,..l][order(pvalue)]
+print(xtable(dt_recap[,..l][order(pvalue)]), include.rownames=FALSE)
 
-l <- c("variable_label", "Estimate_min", "Estimate_max","Estimate_95", 'pvalue')
+l <- c("variable_label","pval_weak", "pval_WH")
+print(xtable(dt_recap[,..l]), include.rownames=FALSE)
+
+# Elections
+data_loc <- Variable_elections_legislative(copy(filo_merged), marge_a_50_pct)
+var_instru <- "Z_instru"
+dt_recap <- Faire_regression_IV(data_loc,var_instru = var_instru,liste_var_reg_12_20, liste_var_reg_13_20, Ponderer_regression, liste_var_demographie, modeliser_relatif = modeliser_relatif, var_clustering = "LIBCOM")
+
 l <- c("variable_label","Estimate_95", 'pvalue')
 dt_recap[,..l][order(pvalue)]
 print(xtable(dt_recap[,..l][order(pvalue)]), include.rownames=FALSE)
@@ -122,27 +136,28 @@ l <- c("variable_label","pval_weak", "pval_WH")
 print(xtable(dt_recap[,..l]), include.rownames=FALSE)
 
 
-# Ajustements des p-value pour test Wu-Hausman (pas d'intérêt pour weak instruments étant donné pval < 10e-13) pour 
+################################################################################
+########################### BROUILLON EN DESSOUS ###############################
+################################################################################
 
-dt_recap_WH <- dt_recap[ , c("Estimate", "pval_WH", "variable", "Annees", "variable_label"), with = TRUE]
-colnames(dt_recap_WH)[2] <- "pvalue"
-dt_recap_WH <- Ajout_pval_BH(dt_recap_WH, alpha)
-dt_recap_WH <- Ajout_pval_Bonf(dt_recap_WH, alpha)
-l <- c("variable_label", 'pvalue', "pval_Bonf", "pval_BH")
-print(xtable(dt_recap_WH[,..l]), include.rownames = FALSE)
-  
-# Tracés
-titre <- "pvalue et significativité\nau sens de la procédure de Benjamini-Hochberg"
-titre_save <- paste(repo_sorties, "Trace_IV_pval_WH_cor_BH.pdf", sep = "/")
-scale_y <- "identity" # identity ou log10 pour l'axe y
-trace_pval_BH(dt_recap_WH, alpha, titre_save, titre, scale_y)
-
-titre <- "pvalue et significativité\nau sens de la procédure de Bonferroni"
-titre_save <- paste(repo_sorties, "Trace_IV_pval_WH_cor_Bonf.pdf", sep = "/")
-scale_y <- "identity" # identity ou log10 pour l'axe y
-trace_pval_Bonf(dt_recap_WH, alpha, titre_save, titre, scale_y)
-
-dt_recap_copy <- copy(dt_recap)
+# data_loc <- Variable_elections_legislative(copy(filo_merged), marge_a_50_pct)
+# dt_recap <- Faire_regression_IV(data_loc,var_instru = "Z_instru",liste_var_reg_12_20, liste_var_reg_13_20, Ponderer_regression, liste_var_demographie, modeliser_relatif = modeliser_relatif, var_clustering = "LIBCOM")
+# 
+# l <- c("variable_label","Estimate_95", 'pvalue')
+# dt_recap[,..l][order(pvalue)]
+# print(xtable(dt_recap[,..l][order(pvalue)]), include.rownames=FALSE)
+# 
+# l <- c("variable_label","pval_weak", "pval_WH")
+# print(xtable(dt_recap[,..l]), include.rownames=FALSE)
+# 
+#   
+# 
+# cor(filo_merged$pvoixOPPOS, filo_merged$beneficiaire)
+# 
+# 
+# dt_recap_merged <- merge(dt_recap_copy, dt_recap, by = c("variable", "variable_label"), suffixes = c("_Distance","_Elections"))
+# 
+# l <- c("variable_label", "Estimate_Distance", "Estimate_Elections", "std_error_Distance", "std_error_Elections")
 
 # Weak instruments : pval très faible = on rejette HO = "l'instrument est faible" ==> OUF
 # Wu-Hausman : pval très faible = on rejette HO = "OLS et IV sont également consistant" ==> OUF : on y gagne avec l'IV !!!
@@ -155,74 +170,53 @@ dt_recap_copy <- copy(dt_recap)
 # Wu-Hausman tests that IV is just as consistent as OLS, and since OLS is more efficient, it would be preferable. The null here is that they are equally consistent; in this output, Wu-Hausman is significant at the p<0.1 level, so if you are OK with that confidence level, that would mean IV is consistent and OLS is not.
 # 
 # Sargan tests overidentification restrictions. The idea is that if you have more than one instrument per endogenous variable, the model is overidentified, and you have some excess information. All of the instruments must be valid for the inferences to be correct. So it tests that all exogenous instruments are in fact exogenous, and uncorrelated with the model residuals. If it is significant, it means that you don't have valid instruments (somewhere in there, as this is a global test). In this case, this isn't a concern. This can get more complex, and researchers have suggested doing further analysis (see this).
-
-
-################################################################################
-########################### AVEC LES ELECTIONS   ###############################
-################################################################################
-liste_dep_idf <- c('75', '77', '78', '91', '92', '93', '94', '95')
-
-leg2007comm <- as.data.table(read.csv(paste(repo_data, "leg2007comm.csv", sep = "/"), header = TRUE, sep="," ))
-
-leg2007comm <- leg2007comm[dep %in% liste_dep_idf]
-
-# pvoixAUG    pvoixPCF   pvoixPS    pvoixRDG    pvoixDVG   pvoixVEC    pvoixECO    pvoixDIV pvoixCPNT  pvoixUDFD
-# pvoixUMP   pvoixDVD    pvoixMPF    pvoixFN    pvoixAUD
-
-liste_partis_opposition <- c('pvoixAUG','pvoixPCF','pvoixPS','pvoixRDG','pvoixDVG','pvoixVEC','pvoixECO','pvoixUDFD','pvoixDIV','pvoixMPF','pvoixFN','pvoixAUD')
-
-liste_partis_majorite <- c('pvoixDIV', 'pvoixUMP', 'pvoixDVD')
-
-
-# Tot = 15
-length(liste_partis_opposition)
-
-
-liste_tot_rows <-  append(c("codecommune"), liste_partis_opposition)
-liste_tot_rows <- append(liste_tot_rows, liste_partis_majorite)
-leg2007comm[, pvoixOPPOS := rowSums(.SD, na.rm=T),.SDcols=liste_partis_opposition]
-leg2007comm[, pvoixMAJO := rowSums(.SD, na.rm=T),.SDcols=liste_partis_majorite]
-
-
-
-leg2007comm
-filo_merged[, codecommune := substring(IRIS, 1, 5)]
-
-
-l <- c("pvoixOPPOS", "pvoixMAJO", "codecommune")
-filo_merged <- merge(filo_merged, leg2007comm[,..l], by = "codecommune", all.x = TRUE)
-
-
-data_loc <- copy(filo_merged)
-dt_recap <- Faire_regression_IV_legislatives_evolution_traitement(data_loc, liste_var_reg_12_20, liste_var_reg_13_20, Ponderer_regression, liste_var_demographie, modeliser_relatif = modeliser_relatif)
-dt_recap <- ajout_label_variables_filosofi(dt_recap)
-dt_recap$Estimate_min <- dt_recap$Estimate - 1.96*dt_recap$std_error
-dt_recap$Estimate_max <- dt_recap$Estimate + 1.96*dt_recap$std_error
-
-dt_recap$Estimate_95 <- paste("[", round(dt_recap$Estimate_min, 2), " ; ", round(dt_recap$Estimate_max, 2), "]", sep = "")
-
-l <- c("variable_label", "Estimate_min", "Estimate_max","Estimate_95", 'pvalue')
-l <- c("variable_label","Estimate_95", 'pvalue')
-dt_recap[,..l][order(pvalue)]
-print(xtable(dt_recap[,..l][order(pvalue)]), include.rownames=FALSE)
-
-l <- c("variable_label","pval_weak", "pval_WH")
-print(xtable(dt_recap[,..l]), include.rownames=FALSE)
-
-  
-
-cor(filo_merged$pvoixOPPOS, filo_merged$beneficiaire)
-
-
-dt_recap_merged <- merge(dt_recap_copy, dt_recap, by = c("variable", "variable_label"), suffixes = c("_Distance","_Elections"))
-
-l <- c("variable_label", "Estimate_Distance", "Estimate_Elections", "std_error_Distance", "std_error_Elections")
-dt_recap_merged[pvalue_Distance <= 0.10 & pvalue_Elections <= 0.10][,..l]
-################################################################################
-########################### BROUILLON EN DESSOUS ###############################
-################################################################################
-
+# data_loc <- Variable_distance_aeroport(copy(filo_merged))
+# var <- "DEC_D1"
 # 
+# var_20 <- paste(var, "20", sep = "")
+# var_12 <- paste(var, "12", sep = "")
+# data_loc[, Evolution := get(var_20) - get(var_12)]
+# 
+# sous_dt <- data_loc[TYP_IRIS_20 == 'H']
+# sous_dt$LIBCOM <- as.factor(sous_dt$LIBCOM)
+# sous_dt$beneficiaire <- as.numeric(sous_dt$beneficiaire)
+# 
+# 
+# model_iv <- ivreg(Evolution ~ beneficiaire | distance_aeroport, data = sous_dt, na.action = na.omit)
+# 
+# # Calcul des erreurs standards clusterisées
+# clustered_se <- coeftest(model_iv, vcov. = vcovHC(model_iv, type = "HC1", cluster = "LIBCOM"))
+# # Calcul des intervalles de confiance à 95%
+# conf_int <- confint(clustered_se)
+# ligne_IC <- conf_int[2,]
+# df_loc$std_error <- (df_loc$Estimate - ligne_IC[1])/1.96
+# # Affichage des intervalles de confiance
+# conf_int
+# ligne_IC <- conf_int[2,]
+# df_loc$std_error <- (df_loc$Estimate - ligne_IC[1])/1.96
+# df_loc$std_error_p <- (ligne_IC[2] - df_loc$Estimate)/1.96
+# 
+# #  (dt_recap$Estimate - IC)/1.96 = dt_recap$std_error
+# # dt_recap$Estimate_max - dt_recap$Estimate = 1.96*dt_recap$std_error
+# df_loc <- as.data.table(summary(model_iv)$coefficients)[2,]
+# setnames(df_loc, "Pr(>|t|)", "pvalue")
+# setnames(df_loc, "Std. Error", "std_error")
+# df_loc$variable <- var
+# df_loc_weak <- as.data.table(summary(model)$diagnostics)[1,]
+# df_loc$pval_weak <- df_loc_weak$`p-value`
+# df_loc_WH <- as.data.table(summary(model)$diagnostics)[2,]
+# df_loc$pval_WH <- df_loc_WH$`p-value`
+
+
+
+
+model <- ivreg(Evolution ~ beneficiaire | distance_aeroport | cluster(LIBCOM), data = sous_dt, na.rm = TRUE)
+
+sous_dt$LIBCOM
+
+model <- ivreg(Y ~ X | Z | cluster(C), data = nom_de_votre_dataframe)
+
+
 # # Création d'un data.tabla vierge pour stocker les résultats, en particulier les tests propres aux régressions IV (test de qualité de l'instrument, test de Wu-Hausman)
 # dt_recap_loc <- data.table(Estimate = numeric(),
 #                            pvalue = numeric(),
