@@ -41,7 +41,7 @@ ajout_label_variables_filosofi <- function(data_loc){
   
   data_loc[, variable_label := factor(
     fcase(
-      variable == "DEC_PPEN", "Part des pensions, retraites et rentes (%)",
+      variable == "DEC_PPEN", "Part des pensions, retraites, rentes (%)",
       variable == "DEC_D2", "2e décile (€)",
       variable == "DEC_D1", "1er décile (€)",
       variable == "DEC_D3", "3e décile (€)",

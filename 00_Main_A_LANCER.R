@@ -110,30 +110,31 @@ trace_pval_Bonf(dt_recap, alpha, titre_save, titre, scale_y)
 ################################################################################
 ########################### ANALYSE PAR IV  ####################################
 ################################################################################
-
 ## Distance à l'axe
 data_loc <- Variable_distance_aeroport(copy(filo_merged))
 var_instru <- "distance_aeroport"
-dt_recap <- Faire_regression_IV(data_loc,var_instru = var_instru,liste_var_reg_12_20, liste_var_reg_13_20, Ponderer_regression, liste_var_demographie, modeliser_relatif = modeliser_relatif, var_clustering = "LIBCOM")
+dt_recap1 <- Faire_regression_IV(data_loc,var_instru = var_instru,liste_var_reg_12_20, liste_var_reg_13_20, Ponderer_regression,
+                                liste_var_demographie, modeliser_relatif = modeliser_relatif, var_clustering = "LIBCOM")
 
 l <- c("variable_label","Estimate_95", 'pvalue')
-dt_recap[,..l][order(pvalue)]
-print(xtable(dt_recap[,..l][order(pvalue)]), include.rownames=FALSE)
+dt_recap1[,..l][order(pvalue)]
+print(xtable(dt_recap1[,..l][order(pvalue)]), include.rownames=FALSE)
 
 l <- c("variable_label","pval_weak", "pval_WH")
-print(xtable(dt_recap[,..l]), include.rownames=FALSE)
+print(xtable(dt_recap1[,..l]), include.rownames=FALSE)
+
+
 
 # Elections
+marge_a_50_pct <- 10 # En pourcentage d'écart
 data_loc <- Variable_elections_legislative(copy(filo_merged), marge_a_50_pct)
-var_instru <- "Z_instru"
-dt_recap <- Faire_regression_IV(data_loc,var_instru = var_instru,liste_var_reg_12_20, liste_var_reg_13_20, Ponderer_regression, liste_var_demographie, modeliser_relatif = modeliser_relatif, var_clustering = "LIBCOM")
-
+dt_recap2 <- Faire_regression_IV(data_loc[Z_instru == 1],var_instru = "pvoixMAJO",liste_var_reg_12_20, liste_var_reg_13_20, Ponderer_regression,
+                                liste_var_demographie, modeliser_relatif = modeliser_relatif, var_clustering = "LIBCOM")
 l <- c("variable_label","Estimate_95", 'pvalue')
-dt_recap[,..l][order(pvalue)]
-print(xtable(dt_recap[,..l][order(pvalue)]), include.rownames=FALSE)
+dt_recap2[,..l][order(pvalue)]
+print(xtable(dt_recap2[,..l][order(pvalue)]), include.rownames=FALSE)
 
-l <- c("variable_label","pval_weak", "pval_WH")
-print(xtable(dt_recap[,..l]), include.rownames=FALSE)
+
 
 
 ################################################################################

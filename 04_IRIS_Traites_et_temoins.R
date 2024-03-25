@@ -81,8 +81,6 @@ Variable_elections_legislative <- function(data_loc, marge_a_50_pct){
   leg2007comm[, pvoixMAJO := rowSums(.SD, na.rm=T),.SDcols=liste_partis_majorite]
   data_loc[, codecommune := substring(IRIS, 1, 5)]
   
-  
-  marge_a_50_pct <- 10
   leg2007comm[, Z_instru := 0]
   leg2007comm[abs(50 - 100*pvoixMAJO) <= marge_a_50_pct, Z_instru := 1]
   table(leg2007comm$Z_instru)
