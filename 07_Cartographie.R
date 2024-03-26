@@ -58,7 +58,7 @@ for(var in liste_var_reg_12_20){
 }
 
 
-a <- merge(data_loc, map_iris_idf, by.x = "IRIS", by.y = "CODE_IRIS") |> st_as_sf()
+data_loc_sf <- merge(data_loc, map_iris_idf, by.x = "IRIS", by.y = "CODE_IRIS") |> st_as_sf()
 
 
 for(var in liste_var_reg_12_20){
@@ -70,18 +70,23 @@ for(var in liste_var_reg_12_20){
               tm_shape(a |> filter(intersects)) + tm_polygons(col = var_12, palette = 'viridis', style = 'cont', border.alpha = 0) + 
               tm_shape(a |> filter(intersects)) + tm_polygons(col = var_20, palette = 'viridis', style = 'cont', border.alpha = 0) + 
               tm_shape(a) + tm_polygons(col = var_12, palette = 'viridis', style = 'cont', border.alpha = 0) + 
-              tm_shape(a) + tm_polygons(col = var_20, palette = 'viridis', style = 'cont', border.alpha = 0, labels = ) + 
+              tm_shape(a) + tm_polygons(col = var_20, palette = 'viridis', style = 'cont', border.alpha = 0) + 
               tm_shape(intersection) + tm_polygons(alpha = 0.8, col = 'red')", sep = "")
   eval(parse(text = txt))
 }
 
-tm_shape(a) + tm_polygons(col = "DEC_MED12", palette = 'viridis', style = 'cont', border.alpha = 0)
-tm_shape(a) + tm_polygons(col = "DEC_MED20", palette = 'viridis', style = 'cont', border.alpha = 0)
+tm_shape(data_loc_sf) + tm_polygons(col = "DEC_MED12", palette = 'viridis', style = 'cont', border.alpha = 0)
+tm_shape(data_loc_sf) + tm_polygons(col = "DEC_MED20", palette = 'viridis', style = 'cont', border.alpha = 0)
 
+# Création des points pour la IV distance_aéroport
 # Coordonnées récupérées manuellement sur Google Maps
 puntos <- data.frame(name = c("Aéroport Roissy", "Les Halles", "Aéroport Orly"),
                      lat = c(49.009762, 48.861708, 48.72956),
                      lon = c(2.542081, 2.347543, 2.359528))
+
+# ORLY 48.72956, 2.359528
+# ROISSY 49.009762, 2.542081
+# CHATELET 48.861708, 2.347543
 
 # Coordonnées GPS donc EPSG:4326 mais on utilise la projection INSPIRE : EPSG:3035
 puntos_sf <- st_as_sf(puntos, coords = c("lon","lat"), crs = 4326) |> st_transform(crs = 3035)
@@ -91,27 +96,46 @@ puntos_linestr <- st_combine(puntos_sf) %>% st_cast("LINESTRING")
 tm_shape(puntos_linestr) + tm_lines(col = "red") +
   tm_shape(puntos_sf) + tm_dots(col = "green")
 
-# ORLY 48.72956, 2.359528
-# ROISSY 49.009762, 2.542081
-# CHATELET 48.861708, 2.347543
 
+### Stats desc spatiales ###
 
-# tmap_full_EVO_DEC_D9
+#Indice de Moran pour l'autocorrélation spatiale globale, package spdep
+#On dégage l'ile Saint-Louis qui n'a pas de voisins : crée des erreurs
 
-# #781890000
-# filo_merged[IRIS == "781890000"]
-# filo_merged[IRIS == "781890000"]$DEC_D918
-# 
-# filo_2012[IRIS == '781890000']
-# pop_2020[IRIS == "781890000"]
-# colnames(pop_20)
-# 
-# filo_2020[IRIS == '78189']
-#GGPLOT, en cours
+iris.nb <- poly2nb(data_loc_sf[-60,])
+iris.lw <- nb2listw(iris.nb, zero.policy = FALSE)
+iris.data <- as.data.frame(data_loc_sf[-60,])
 
-fond_carte_idf <- map_data(map = "france", region = c("Paris", "Hauts-de-Seine", "Val-de-Marne", "Seine-Saint-Denis", "Essonne", "Yvelines", "Seine-et-Marne", "Val-Doise"))
+iris.nb
+iris.lw
 
-ggplot(fond_carte_idf, aes(long, lat, group = group)) +
-  geom_polygon(fill = "white", colour = "grey50") + 
-  geom_polygon(data = a, mapping = aes( fill = "EVO_DEC_D1")) +
-  coord_quickmap() 
+for(var in liste_var_reg_12_20){
+  varevo <- paste("EVO", var, sep = "_")
+  txt <- paste("moran.test(iris.data$", varevo,", iris.lw, zero.policy = FALSE, na.action = na.omit)")
+  eval(parse(text = txt))
+}
+
+tm_shape(data_loc_sf[-60,]) + tm_polygons(col = "EVO_DEC_TP60")
+
+moran.test(iris.data$EVO_DEC_MED, iris.lw, zero.policy = FALSE, na.action = na.omit)
+moran.mc(iris.data$EVO_DEC_MED, iris.lw, nsim = 1000, zero.policy = FALSE, na.action = na.omit)
+
+# Autocorrélation spatiale locale
+
+localG_perm(iris.data$EVO_DEC_TP60, iris.lw, nsim = 1000, zero.policy = FALSE)
+
+# spdep n'est pas du tout robuste aux données manquantes
+# Pb si on enlève juste les lignes sans data, iris.lw n'est plus de même taille que x : erreur
+# Si on ajuste iris.lw également, fortes chances de se trouver avec des Iris sans voisins : erreur
+
+test_autocorrelation_spatiale <- function(var){
+  # Test de moran : H_0 = pas d'autocorrélation spatiale, H_1 = présence d'autocorr. spatiale
+  test_moran <- moran.test(var, iris.lw, zero.policy = FALSE, na.action = na.omit)
+  xtable(test_moran)
+}
+
+# Visu IRIS avec données complètes
+# Environ 60% des observations incomplètes
+data_loc_sf_noNA <- data_loc_sf %>% na.omit()
+tm_shape(data_loc_sf_noNA) + tm_polygons(col = 'black')
+
