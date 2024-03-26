@@ -21,9 +21,16 @@ library(dodgr)
 #Econométrie
 library(ivreg)
 library(modelsummary)
+<<<<<<< HEAD
 
 #Econométrie spatiale (voir Manuel d'Analyse Spatiale, INSEE Méthodes n°131, 2018)
 library(spdep)
 
 #LateX
 library(xtable)
+=======
+library(AER)
+library(multiwayvcov)
+library(sandwich)
+library(lmtest)
+>>>>>>> cd2e120fb4c7fa9bcea25e81e73ac4f310c7de36

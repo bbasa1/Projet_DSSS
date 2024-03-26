@@ -69,4 +69,26 @@ Variable_distance_aeroport <- function(data_loc){
   dt_merged_loc <- dt_merged_loc |> st_drop_geometry()
   return(as.data.table(dt_merged_loc))
 }
+
+
+Variable_elections_legislative <- function(data_loc, marge_a_50_pct){
+  leg2007comm <- as.data.table(read.csv(paste(repo_data, "leg2007comm.csv", sep = "/"), header = TRUE, sep="," ))
+  
+  leg2007comm <- leg2007comm[dep %in% liste_dep_idf]
+  liste_tot_rows <-  append(c("codecommune"), liste_partis_opposition)
+  liste_tot_rows <- append(liste_tot_rows, liste_partis_majorite)
+  leg2007comm[, pvoixOPPOS := rowSums(.SD, na.rm=T),.SDcols=liste_partis_opposition]
+  leg2007comm[, pvoixMAJO := rowSums(.SD, na.rm=T),.SDcols=liste_partis_majorite]
+  data_loc[, codecommune := substring(IRIS, 1, 5)]
+  
+  leg2007comm[, Z_instru := 0]
+  leg2007comm[abs(50 - 100*pvoixMAJO) <= marge_a_50_pct, Z_instru := 1]
+  table(leg2007comm$Z_instru)
+  
+  
+  l <- c("pvoixOPPOS", "pvoixMAJO", "codecommune", "Z_instru")
+  data_loc <- merge(data_loc, leg2007comm[,..l], by = "codecommune", all.x = TRUE)
+  
+  return(data_loc)
+}
   
