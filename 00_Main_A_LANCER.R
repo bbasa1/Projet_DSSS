@@ -140,7 +140,11 @@ print(xtable(dt_recap2[,..l][order(pvalue)]), include.rownames=FALSE)
 ################################################################################
 ########################### BROUILLON EN DESSOUS ###############################
 ################################################################################
+l <- c("CODE_IRIS", "NOM_COM","DEC_MED12", "DEC_MED13", "DEC_MED20", "P12_POP", "beneficiaire")
 
+data_loc[!is.na(DEC_MED12) & beneficiaire == 1][,..l]
+
+data_loc$P12_POP
 # data_loc <- Variable_elections_legislative(copy(filo_merged), marge_a_50_pct)
 # dt_recap <- Faire_regression_IV(data_loc,var_instru = "Z_instru",liste_var_reg_12_20, liste_var_reg_13_20, Ponderer_regression, liste_var_demographie, modeliser_relatif = modeliser_relatif, var_clustering = "LIBCOM")
 # 
