@@ -142,6 +142,7 @@ trace_pval_Bonf(dt_recap_WH, alpha, titre_save, titre, scale_y)
 
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 ################################################################################
 ########################### BROUILLON EN DESSOUS ###############################
@@ -170,6 +171,8 @@ data_loc$P12_POP
 # 
 # l <- c("variable_label", "Estimate_Distance", "Estimate_Elections", "std_error_Distance", "std_error_Elections")
 
+=======
+>>>>>>> parent of 8667603 (merge)
 =======
 >>>>>>> parent of 8667603 (merge)
 # Weak instruments : pval très faible = on rejette HO = "l'instrument est faible" ==> OUF
