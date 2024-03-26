@@ -140,10 +140,6 @@ titre_save <- paste(repo_sorties, "Trace_IV_pval_WH_cor_Bonf.pdf", sep = "/")
 scale_y <- "identity" # identity ou log10 pour l'axe y
 trace_pval_Bonf(dt_recap_WH, alpha, titre_save, titre, scale_y)
 
-
-<<<<<<< HEAD
-<<<<<<< HEAD
-
 ################################################################################
 ########################### BROUILLON EN DESSOUS ###############################
 ################################################################################
@@ -170,11 +166,6 @@ data_loc$P12_POP
 # dt_recap_merged <- merge(dt_recap_copy, dt_recap, by = c("variable", "variable_label"), suffixes = c("_Distance","_Elections"))
 # 
 # l <- c("variable_label", "Estimate_Distance", "Estimate_Elections", "std_error_Distance", "std_error_Elections")
-
-=======
->>>>>>> parent of 8667603 (merge)
-=======
->>>>>>> parent of 8667603 (merge)
 # Weak instruments : pval très faible = on rejette HO = "l'instrument est faible" ==> OUF
 # Wu-Hausman : pval très faible = on rejette HO = "OLS et IV sont également consistant" ==> OUF : on y gagne avec l'IV !!!
 # Sargan : Uniquement dans le cas où on a plusieurs IV
