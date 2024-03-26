@@ -109,6 +109,8 @@ Faire_regression_IV <- function(data_loc, var_instru,  liste_var_reg_12_20, list
     # df_loc$pval_weak <- df_loc_weak$`p-value`
     # df_loc_WH <- as.data.table(summary(model)$diagnostics)[2,]
     # df_loc$pval_WH <- df_loc_WH$`p-value`
+    # df_loc$Wald_stat <- summary(model)$waldtest[1]
+    # df_loc$Wald_pval <- summary(model)$waldtest[2]
     
     # Ajout std error clusterisées
     clustered_se <- coeftest(model, vcov. = vcovHC(model, type = "HC1", cluster = var_clustering))
@@ -117,7 +119,7 @@ Faire_regression_IV <- function(data_loc, var_instru,  liste_var_reg_12_20, list
     ligne_IC <- conf_int[2,]
     df_loc$std_error <- (df_loc$Estimate - ligne_IC[1])/1.96
     
-    # l <- c("Estimate", "pvalue", "variable", "pval_weak", "pval_WH", "std_error")
+    # l <- c("Estimate", "pvalue", "variable", "pval_weak", "pval_WH", "std_error", "Wald_stat", "Wald_pval")    
     l <- c("Estimate", "pvalue", "variable", "std_error")
     dt_recap_loc <- rbindlist(list(dt_recap_loc, df_loc[,..l]), fill=TRUE)
   }
@@ -150,6 +152,8 @@ Faire_regression_IV <- function(data_loc, var_instru,  liste_var_reg_12_20, list
     # df_loc$pval_weak <- df_loc_weak$`p-value`
     # df_loc_WH <- as.data.table(summary(model)$diagnostics)[2,]
     # df_loc$pval_WH <- df_loc_WH$`p-value`
+    # df_loc$Wald_stat <- summary(model)$waldtest[1]
+    # df_loc$Wald_pval <- summary(model)$waldtest[2]
     
     # Ajout std error clusterisées
     clustered_se <- coeftest(model, vcov. = vcovHC(model, type = "HC1", cluster = var_clustering))
@@ -159,7 +163,8 @@ Faire_regression_IV <- function(data_loc, var_instru,  liste_var_reg_12_20, list
     df_loc$std_error <- (df_loc$Estimate - ligne_IC[1])/1.96
     
     
-    # l <- c("Estimate", "pvalue", "variable", "pval_weak", "pval_WH", "std_error")
+    
+    # l <- c("Estimate", "pvalue", "variable", "pval_weak", "pval_WH", "std_error", "Wald_stat", "Wald_pval")    
     l <- c("Estimate", "pvalue", "variable", "std_error")
     dt_recap_loc <- rbindlist(list(dt_recap_loc, df_loc[,..l]), fill=TRUE)
   }
@@ -194,7 +199,8 @@ Faire_regression_IV <- function(data_loc, var_instru,  liste_var_reg_12_20, list
     # df_loc$pval_weak <- df_loc_weak$`p-value`
     # df_loc_WH <- as.data.table(summary(model)$diagnostics)[2,]
     # df_loc$pval_WH <- df_loc_WH$`p-value`
-    
+    # df_loc$Wald_stat <- summary(model)$waldtest[1]
+    # df_loc$Wald_pval <- summary(model)$waldtest[2]
     
     
     # Ajout std error clusterisées
@@ -205,7 +211,7 @@ Faire_regression_IV <- function(data_loc, var_instru,  liste_var_reg_12_20, list
     df_loc$std_error <- (df_loc$Estimate - ligne_IC[1])/1.96
     
 
-    # l <- c("Estimate", "pvalue", "variable", "pval_weak", "pval_WH", "std_error")
+    # l <- c("Estimate", "pvalue", "variable", "pval_weak", "pval_WH", "std_error", "Wald_stat", "Wald_pval")    
     l <- c("Estimate", "pvalue", "variable", "std_error")
     dt_recap_loc <- rbindlist(list(dt_recap_loc, df_loc[,..l]), fill=TRUE)
   }
