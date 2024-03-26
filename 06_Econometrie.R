@@ -103,10 +103,14 @@ Faire_regression_IV_aeroport_evolution_traitement <- function(data_loc, liste_va
     df_loc$variable <- var
     df_loc_weak <- as.data.table(summary(model)$diagnostics)[1,]
     df_loc$pval_weak <- df_loc_weak$`p-value`
+    
     df_loc_WH <- as.data.table(summary(model)$diagnostics)[2,]
     df_loc$pval_WH <- df_loc_WH$`p-value`
     
-    l <- c("Estimate", "pvalue", "variable", "pval_weak", "pval_WH", "std_error")
+    df_loc$Wald_stat <- summary(model)$waldtest[1]
+    df_loc$Wald_pval <- summary(model)$waldtest[2]
+    
+    l <- c("Estimate", "pvalue", "variable", "pval_weak", "pval_WH", "std_error", "Wald_stat", "Wald_pval")
     dt_recap_loc <- rbindlist(list(dt_recap_loc, df_loc[,..l]), fill=TRUE)
   }
   dt_recap_loc$Annees <- "2012 - 2020"
@@ -134,7 +138,10 @@ Faire_regression_IV_aeroport_evolution_traitement <- function(data_loc, liste_va
     df_loc_WH <- as.data.table(summary(model)$diagnostics)[2,]
     df_loc$pval_WH <- df_loc_WH$`p-value`
     
-    l <- c("Estimate", "pvalue", "variable", "pval_weak", "pval_WH", "std_error")
+    df_loc$Wald_stat <- summary(model)$waldtest[1]
+    df_loc$Wald_pval <- summary(model)$waldtest[2]
+    
+    l <- c("Estimate", "pvalue", "variable", "pval_weak", "pval_WH", "std_error", "Wald_stat", "Wald_pval")
     dt_recap_loc <- rbindlist(list(dt_recap_loc, df_loc[,..l]), fill=TRUE)
   }
   dt_recap_loc[is.na(Annees), Annees := "2013 - 2020"]
@@ -164,7 +171,10 @@ Faire_regression_IV_aeroport_evolution_traitement <- function(data_loc, liste_va
     df_loc_WH <- as.data.table(summary(model)$diagnostics)[2,]
     df_loc$pval_WH <- df_loc_WH$`p-value`
     
-    l <- c("Estimate", "pvalue", "variable", "pval_weak", "pval_WH", "std_error")
+    df_loc$Wald_stat <- summary(model)$waldtest[1]
+    df_loc$Wald_pval <- summary(model)$waldtest[2]
+    
+    l <- c("Estimate", "pvalue", "variable", "pval_weak", "pval_WH", "std_error", "Wald_stat", "Wald_pval")
     dt_recap_loc <- rbindlist(list(dt_recap_loc, df_loc[,..l]), fill=TRUE)
   }
   dt_recap_loc[is.na(Annees), Annees := "2012 - 2020 (Démo)"]
@@ -209,10 +219,14 @@ Faire_regression_IV_legislatives_evolution_traitement <- function(data_loc, list
     df_loc$variable <- var
     df_loc_weak <- as.data.table(summary(model)$diagnostics)[1,]
     df_loc$pval_weak <- df_loc_weak$`p-value`
+    
     df_loc_WH <- as.data.table(summary(model)$diagnostics)[2,]
     df_loc$pval_WH <- df_loc_WH$`p-value`
     
-    l <- c("Estimate", "pvalue", "variable", "pval_weak", "pval_WH", "std_error")
+    df_loc$Wald_stat <- summary(model)$waldtest[1]
+    df_loc$Wald_pval <- summary(model)$waldtest[2]
+    
+    l <- c("Estimate", "pvalue", "variable", "pval_weak", "pval_WH", "std_error", "Wald_stat", "Wald_pval")
     dt_recap_loc <- rbindlist(list(dt_recap_loc, df_loc[,..l]), fill=TRUE)
   }
   dt_recap_loc$Annees <- "2012 - 2020"
@@ -240,7 +254,10 @@ Faire_regression_IV_legislatives_evolution_traitement <- function(data_loc, list
     df_loc_WH <- as.data.table(summary(model)$diagnostics)[2,]
     df_loc$pval_WH <- df_loc_WH$`p-value`
     
-    l <- c("Estimate", "pvalue", "variable", "pval_weak", "pval_WH", "std_error")
+    df_loc$Wald_stat <- summary(model)$waldtest[1]
+    df_loc$Wald_pval <- summary(model)$waldtest[2]
+    
+    l <- c("Estimate", "pvalue", "variable", "pval_weak", "pval_WH", "std_error", "Wald_stat", "Wald_pval")
     dt_recap_loc <- rbindlist(list(dt_recap_loc, df_loc[,..l]), fill=TRUE)
   }
   dt_recap_loc[is.na(Annees), Annees := "2013 - 2020"]
@@ -270,7 +287,10 @@ Faire_regression_IV_legislatives_evolution_traitement <- function(data_loc, list
     df_loc_WH <- as.data.table(summary(model)$diagnostics)[2,]
     df_loc$pval_WH <- df_loc_WH$`p-value`
     
-    l <- c("Estimate", "pvalue", "variable", "pval_weak", "pval_WH", "std_error")
+    df_loc$Wald_stat <- summary(model)$waldtest[1]
+    df_loc$Wald_pval <- summary(model)$waldtest[2]
+    
+    l <- c("Estimate", "pvalue", "variable", "pval_weak", "pval_WH", "std_error", "Wald_stat", "Wald_pval")
     dt_recap_loc <- rbindlist(list(dt_recap_loc, df_loc[,..l]), fill=TRUE)
   }
   dt_recap_loc[is.na(Annees), Annees := "2012 - 2020 (Démo)"]
