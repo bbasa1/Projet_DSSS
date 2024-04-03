@@ -141,6 +141,16 @@ print(xtable(dt_recap2[,..l][order(pvalue)]), include.rownames=FALSE)
 ########################### BROUILLON EN DESSOUS ###############################
 ################################################################################
 
+l <- c("IRIS", "Evolution", "P20_POP", "P12_POP")
+filo_merged[, Evolution := P20_POP - P12_POP][,..l][IRIS == '956800110']
+data_loc[, Evolution := P20_POP - P12_POP][,..l][IRIS == '940810306']
+
+14260 - 14040
+
+data_loc$P12_POP
+
+pop_2020[IRIS == '956800110']
+
 # data_loc <- Variable_elections_legislative(copy(filo_merged), marge_a_50_pct)
 # dt_recap <- Faire_regression_IV(data_loc,var_instru = "Z_instru",liste_var_reg_12_20, liste_var_reg_13_20, Ponderer_regression, liste_var_demographie, modeliser_relatif = modeliser_relatif, var_clustering = "LIBCOM")
 # 
