@@ -70,7 +70,7 @@ Faire_regression_evolution_traitement <- function(data_loc, liste_var_reg_12_20,
 
 
 
-Faire_regression_IV <- function(data_loc, var_instru,  liste_var_reg_12_20, liste_var_reg_13_20, Ponderer_regression = FALSE, liste_var_demographie, modeliser_relatif = FALSE, var_clustering = "LIBCOM"){
+Faire_regression_IV <- function(data_loc, var_instru,  liste_var_reg_12_20, liste_var_reg_13_20, Ponderer_regression = FALSE, liste_var_demographie, modeliser_relatif = FALSE, var_clustering = "LIBCOM", var_controle = ""){
   # Fait toutes les régressions linéaire de la forme X = Traitement, Y = Evolution des var socio-eco
   
   # Création d'un data.tabla vierge pour stocker les résultats, en particulier les tests propres aux régressions IV (test de qualité de l'instrument, test de Wu-Hausman)
@@ -98,7 +98,11 @@ Faire_regression_IV <- function(data_loc, var_instru,  liste_var_reg_12_20, list
     if(Ponderer_regression){
       model <- ivreg(Evolution ~ beneficiaire | get(var_instru), data = data_loc[TYP_IRIS_20 == 'H'], weights = P20_POP) 
     }else{
+      if(var_controle != ""){
+        model <- ivreg(Evolution ~ beneficiaire + get(var_controle) | get(var_instru), data = data_loc[TYP_IRIS_20 == 'H'])
+      }else{
       model <- ivreg(Evolution ~ beneficiaire | get(var_instru), data = data_loc[TYP_IRIS_20 == 'H'])
+      }
     }
 
     df_loc <- as.data.table(summary(model)$coefficients)[2,]
@@ -140,8 +144,12 @@ Faire_regression_IV <- function(data_loc, var_instru,  liste_var_reg_12_20, list
     if(Ponderer_regression){
       model <- ivreg(Evolution ~ beneficiaire | get(var_instru), data = data_loc[TYP_IRIS_20 == 'H'], weights = P20_POP) 
     }else{
-      model <- ivreg(Evolution ~ beneficiaire | get(var_instru), data = data_loc[TYP_IRIS_20 == 'H'])
-    }
+      if(var_controle != ""){
+        model <- ivreg(Evolution ~ beneficiaire + get(var_controle) | get(var_instru), data = data_loc[TYP_IRIS_20 == 'H'])
+      }else{
+        model <- ivreg(Evolution ~ beneficiaire | get(var_instru), data = data_loc[TYP_IRIS_20 == 'H'])
+      }
+      }
     
     df_loc <- as.data.table(summary(model)$coefficients)[2,]
     setnames(df_loc, "Pr(>|t|)", "pvalue")
@@ -187,8 +195,12 @@ Faire_regression_IV <- function(data_loc, var_instru,  liste_var_reg_12_20, list
     if(Ponderer_regression){
       model <- ivreg(Evolution ~ beneficiaire | get(var_instru), data = data_loc[TYP_IRIS_20 == 'H'], weights = P20_POP) 
     }else{
-      model <- ivreg(Evolution ~ beneficiaire | get(var_instru), data = data_loc[TYP_IRIS_20 == 'H'])
-    }
+      if(var_controle != ""){
+        model <- ivreg(Evolution ~ beneficiaire + get(var_controle) | get(var_instru), data = data_loc[TYP_IRIS_20 == 'H'])
+      }else{
+        model <- ivreg(Evolution ~ beneficiaire | get(var_instru), data = data_loc[TYP_IRIS_20 == 'H'])
+      }
+      }
     
     df_loc <- as.data.table(summary(model)$coefficients)[2,]
     setnames(df_loc, "Pr(>|t|)", "pvalue")

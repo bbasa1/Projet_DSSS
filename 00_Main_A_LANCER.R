@@ -125,19 +125,25 @@ print(xtable(dt_recap1[,..l]), include.rownames=FALSE)
 
 
 
-# Elections
+# Elections - V1
 marge_a_50_pct <- 10 # En pourcentage d'écart
 data_loc <- Variable_elections_legislative(copy(filo_merged), marge_a_50_pct)
-data_loc[, MAJO_plus_50 := pvoixMAJO >= 0.5]
-dt_recap2 <- Faire_regression_IV(data_loc[Z_instru == 1],var_instru = "MAJO_plus_50",liste_var_reg_12_20, liste_var_reg_13_20, Ponderer_regression,
-                                liste_var_demographie, modeliser_relatif = modeliser_relatif, var_clustering = "LIBCOM", var_controle = "pvoixMAJO")
+dt_recap2 <- Faire_regression_IV(data_loc[Z_instru == 1],var_instru = "pvoixMAJO",liste_var_reg_12_20, liste_var_reg_13_20, Ponderer_regression,
+                                liste_var_demographie, modeliser_relatif = modeliser_relatif, var_clustering = "LIBCOM", var_controle = "")
 l <- c("variable_label","Estimate_95", 'pvalue')
 dt_recap2[,..l][order(pvalue)]
 print(xtable(dt_recap2[,..l][order(pvalue)]), include.rownames=FALSE)
 
-cor(data_loc[Z_instru == 1]$beneficiaire, data_loc[Z_instru == 1]$MAJO_plus_50)
 
-data_loc$beneficiaire
+
+# Elections - V2
+data_loc[, MAJO_plus_50 := pvoixMAJO >= 0.5]
+dt_recap2 <- Faire_regression_IV(data_loc[Z_instru == 1],var_instru = "MAJO_plus_50",liste_var_reg_12_20, liste_var_reg_13_20, Ponderer_regression,
+                                 liste_var_demographie, modeliser_relatif = modeliser_relatif, var_clustering = "LIBCOM", var_controle = "pvoixMAJO")
+l <- c("variable_label","Estimate_95", 'pvalue')
+dt_recap2[,..l][order(pvalue)]
+print(xtable(dt_recap2[,..l][order(pvalue)]), include.rownames=FALSE)
+
 
 ################################################################################
 ########################### BROUILLON EN DESSOUS ###############################
