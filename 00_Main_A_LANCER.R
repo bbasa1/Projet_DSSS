@@ -94,6 +94,9 @@ scale_y <- "identity" # identity ou log10 pour l'axe y
 trace_pval_Bonf(dt_recap, alpha, titre_save, titre, scale_y)
 
 
+filo_merged[, mean(DEC_MED20 - DEC_MED12, na.rm = TRUE), by = 'beneficiaire']
+filo_merged[, mean(DEC_MED20, na.rm = TRUE), by = 'beneficiaire']
+filo_merged[, mean(DEC_MED12, na.rm = TRUE), by = 'beneficiaire']
 
 # ############ QQ VERIFS
 # mean(filo_merged[beneficiaire == 1]$DEC_D220 - filo_merged[beneficiaire == 1]$DEC_D212, na.rm = TRUE)
