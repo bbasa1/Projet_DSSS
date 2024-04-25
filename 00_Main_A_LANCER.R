@@ -123,7 +123,11 @@ l <- c("variable_label","Estimate_95", 'pvalue')
 dt_recap1[,..l][order(pvalue)]
 print(xtable(dt_recap1[,..l][order(pvalue)]), include.rownames=FALSE)
 
-l <- c("variable_label","pval_weak", "pval_WH")
+alpha <- 0.10
+dt_recap1 <- Ajout_pval_BH(dt_recap1, alpha)
+dt_recap1 <- Ajout_pval_Bonf(dt_recap1, alpha)
+
+l <- c("variable_label", "pvalue", "pval_Bonf", "pval_BH", "Estimate_95")
 print(xtable(dt_recap1[,..l]), include.rownames=FALSE)
 
 
@@ -138,8 +142,7 @@ dt_recap2[,..l][order(pvalue)]
 print(xtable(dt_recap2[,..l][order(pvalue)]), include.rownames=FALSE)
 
 
-
-# Elections - V2
+# Elections - V2 ==> LA BONNE 
 data_loc[, MAJO_plus_50 := pvoixMAJO >= 0.5]
 dt_recap2 <- Faire_regression_IV(data_loc[Z_instru == 1],var_instru = "MAJO_plus_50",liste_var_reg_12_20, liste_var_reg_13_20, Ponderer_regression,
                                  liste_var_demographie, modeliser_relatif = modeliser_relatif, var_clustering = "LIBCOM", var_controle = "pvoixMAJO")
@@ -147,6 +150,13 @@ l <- c("variable_label","Estimate_95", 'pvalue')
 dt_recap2[,..l][order(pvalue)]
 print(xtable(dt_recap2[,..l][order(pvalue)]), include.rownames=FALSE)
 
+
+alpha <- 0.10
+dt_recap2 <- Ajout_pval_BH(dt_recap2, alpha)
+dt_recap2 <- Ajout_pval_Bonf(dt_recap2, alpha)
+
+l <- c("variable_label", "pvalue", "pval_Bonf", "pval_BH", "Estimate_95")
+print(xtable(dt_recap2[,..l]), include.rownames=FALSE)
 
 ################################################################################
 ########################### BROUILLON EN DESSOUS ###############################
