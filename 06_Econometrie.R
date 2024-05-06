@@ -69,8 +69,8 @@ Faire_regression_evolution_traitement <- function(data_loc, liste_var_reg_12_20,
 }
 
 
+Faire_regression_IV <- function(data_loc, var_instru,  liste_var_reg_12_20, liste_var_reg_13_20, Ponderer_regression = FALSE, liste_var_demographie, modeliser_relatif = FALSE, var_clustering = "LIBCOM", var_controle = ""){
 
-Faire_regression_IV_aeroport_evolution_traitement <- function(data_loc, liste_var_reg_12_20, liste_var_reg_13_20, Ponderer_regression = FALSE, liste_var_demographie){
   # Fait toutes les régressions linéaire de la forme X = Traitement, Y = Evolution des var socio-eco
   
   # Création d'un data.tabla vierge pour stocker les résultats, en particulier les tests propres aux régressions IV (test de qualité de l'instrument, test de Wu-Hausman)
@@ -93,24 +93,34 @@ Faire_regression_IV_aeroport_evolution_traitement <- function(data_loc, liste_va
     if(Ponderer_regression){
       model <- ivreg(Evolution ~ beneficiaire | distance_aeroport, data = data_loc[TYP_IRIS_20 == 'H'], weights = P20_POP) 
     }else{
-      model <- ivreg(Evolution ~ beneficiaire | distance_aeroport, data = data_loc[TYP_IRIS_20 == 'H'])
-      # model_lin <- lm(Evolution ~ beneficiaire, data = data_loc[TYP_IRIS_20 == 'H']) #Inutile (pas utilisé ailleurs)?
+      if(var_controle != ""){
+        model <- ivreg(Evolution ~ beneficiaire + get(var_controle) | get(var_instru), data = data_loc[TYP_IRIS_20 == 'H'])
+      }else{
+      model <- ivreg(Evolution ~ beneficiaire | get(var_instru), data = data_loc[TYP_IRIS_20 == 'H'])
+      }
     }
 
     df_loc <- as.data.table(summary(model)$coefficients)[2,]
     setnames(df_loc, "Pr(>|t|)", "pvalue")
     setnames(df_loc, "Std. Error", "std_error")
     df_loc$variable <- var
-    df_loc_weak <- as.data.table(summary(model)$diagnostics)[1,]
-    df_loc$pval_weak <- df_loc_weak$`p-value`
+    # df_loc_weak <- as.data.table(summary(model)$diagnostics)[1,]
+    # df_loc$pval_weak <- df_loc_weak$`p-value`
+    # df_loc_WH <- as.data.table(summary(model)$diagnostics)[2,]
+    # df_loc$pval_WH <- df_loc_WH$`p-value`
+    # df_loc$Wald_stat <- summary(model)$waldtest[1]
+    # df_loc$Wald_pval <- summary(model)$waldtest[2]
     
-    df_loc_WH <- as.data.table(summary(model)$diagnostics)[2,]
-    df_loc$pval_WH <- df_loc_WH$`p-value`
+    # Ajout std error clusterisées
+    clustered_se <- coeftest(model, vcov. = vcovHC(model, type = "HC1", cluster = var_clustering))
+    # Calcul des intervalles de confiance à 95%
+    conf_int <- confint(clustered_se)
+    ligne_IC <- conf_int[2,]
+    df_loc$std_error <- (df_loc$Estimate - ligne_IC[1])/1.96
     
-    df_loc$Wald_stat <- summary(model)$waldtest[1]
-    df_loc$Wald_pval <- summary(model)$waldtest[2]
-    
-    l <- c("Estimate", "pvalue", "variable", "pval_weak", "pval_WH", "std_error", "Wald_stat", "Wald_pval")
+    # l <- c("Estimate", "pvalue", "variable", "pval_weak", "pval_WH", "std_error", "Wald_stat", "Wald_pval")    
+    l <- c("Estimate", "pvalue", "variable", "std_error")
+
     dt_recap_loc <- rbindlist(list(dt_recap_loc, df_loc[,..l]), fill=TRUE)
   }
   dt_recap_loc$Annees <- "2012 - 2020"
@@ -124,16 +134,26 @@ Faire_regression_IV_aeroport_evolution_traitement <- function(data_loc, liste_va
     if(Ponderer_regression){
       model <- ivreg(Evolution ~ beneficiaire | distance_aeroport, data = data_loc[TYP_IRIS_20 == 'H'], weights = P20_POP) 
     }else{
-      model <- ivreg(Evolution ~ beneficiaire | distance_aeroport, data = data_loc[TYP_IRIS_20 == 'H'])
-    }
+      if(var_controle != ""){
+        model <- ivreg(Evolution ~ beneficiaire + get(var_controle) | get(var_instru), data = data_loc[TYP_IRIS_20 == 'H'])
+      }else{
+        model <- ivreg(Evolution ~ beneficiaire | get(var_instru), data = data_loc[TYP_IRIS_20 == 'H'])
+      }
+      }
+
     
     df_loc <- as.data.table(summary(model)$coefficients)[2,]
     setnames(df_loc, "Pr(>|t|)", "pvalue")
     setnames(df_loc, "Std. Error", "std_error")
     df_loc$variable <- var
 
-    df_loc_weak <- as.data.table(summary(model)$diagnostics)[1,]
-    df_loc$pval_weak <- df_loc_weak$`p-value`
+    # df_loc_weak <- as.data.table(summary(model)$diagnostics)[1,]
+    # df_loc$pval_weak <- df_loc_weak$`p-value`
+    # df_loc_WH <- as.data.table(summary(model)$diagnostics)[2,]
+    # df_loc$pval_WH <- df_loc_WH$`p-value`
+    # df_loc$Wald_stat <- summary(model)$waldtest[1]
+    # df_loc$Wald_pval <- summary(model)$waldtest[2]
+
     
     df_loc_WH <- as.data.table(summary(model)$diagnostics)[2,]
     df_loc$pval_WH <- df_loc_WH$`p-value`
@@ -141,7 +161,10 @@ Faire_regression_IV_aeroport_evolution_traitement <- function(data_loc, liste_va
     df_loc$Wald_stat <- summary(model)$waldtest[1]
     df_loc$Wald_pval <- summary(model)$waldtest[2]
     
-    l <- c("Estimate", "pvalue", "variable", "pval_weak", "pval_WH", "std_error", "Wald_stat", "Wald_pval")
+  
+    # l <- c("Estimate", "pvalue", "variable", "pval_weak", "pval_WH", "std_error", "Wald_stat", "Wald_pval")    
+    l <- c("Estimate", "pvalue", "variable", "std_error")
+
     dt_recap_loc <- rbindlist(list(dt_recap_loc, df_loc[,..l]), fill=TRUE)
   }
   dt_recap_loc[is.na(Annees), Annees := "2013 - 2020"]
@@ -157,24 +180,41 @@ Faire_regression_IV_aeroport_evolution_traitement <- function(data_loc, liste_va
     if(Ponderer_regression){
       model <- ivreg(Evolution ~ beneficiaire | distance_aeroport, data = data_loc[TYP_IRIS_20 == 'H'], weights = P20_POP) 
     }else{
-      model <- ivreg(Evolution ~ beneficiaire | distance_aeroport, data = data_loc[TYP_IRIS_20 == 'H'])
-    }
+      if(var_controle != ""){
+        model <- ivreg(Evolution ~ beneficiaire + get(var_controle) | get(var_instru), data = data_loc[TYP_IRIS_20 == 'H'])
+      }else{
+        model <- ivreg(Evolution ~ beneficiaire | get(var_instru), data = data_loc[TYP_IRIS_20 == 'H'])
+      }
+      }
+
     
     df_loc <- as.data.table(summary(model)$coefficients)[2,]
     setnames(df_loc, "Pr(>|t|)", "pvalue")
     setnames(df_loc, "Std. Error", "std_error")
     df_loc$variable <- var
     
-    df_loc_weak <- as.data.table(summary(model)$diagnostics)[1,]
-    df_loc$pval_weak <- df_loc_weak$`p-value`
-    
-    df_loc_WH <- as.data.table(summary(model)$diagnostics)[2,]
-    df_loc$pval_WH <- df_loc_WH$`p-value`
+    # df_loc_weak <- as.data.table(summary(model)$diagnostics)[1,]
+    # df_loc$pval_weak <- df_loc_weak$`p-value`
+    # df_loc_WH <- as.data.table(summary(model)$diagnostics)[2,]
+    # df_loc$pval_WH <- df_loc_WH$`p-value`
+    # df_loc$Wald_stat <- summary(model)$waldtest[1]
+    # df_loc$Wald_pval <- summary(model)$waldtest[2]
+
     
     df_loc$Wald_stat <- summary(model)$waldtest[1]
     df_loc$Wald_pval <- summary(model)$waldtest[2]
     
-    l <- c("Estimate", "pvalue", "variable", "pval_weak", "pval_WH", "std_error", "Wald_stat", "Wald_pval")
+    # Ajout std error clusterisées
+    clustered_se <- coeftest(model, vcov. = vcovHC(model, type = "HC1", cluster = var_clustering))
+    # Calcul des intervalles de confiance à 95%
+    conf_int <- confint(clustered_se)
+    ligne_IC <- conf_int[2,]
+    df_loc$std_error <- (df_loc$Estimate - ligne_IC[1])/1.96
+    
+
+    # l <- c("Estimate", "pvalue", "variable", "pval_weak", "pval_WH", "std_error", "Wald_stat", "Wald_pval")    
+    l <- c("Estimate", "pvalue", "variable", "std_error")
+
     dt_recap_loc <- rbindlist(list(dt_recap_loc, df_loc[,..l]), fill=TRUE)
   }
   dt_recap_loc[is.na(Annees), Annees := "2012 - 2020 (Démo)"]

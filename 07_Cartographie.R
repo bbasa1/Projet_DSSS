@@ -139,3 +139,49 @@ test_autocorrelation_spatiale <- function(var){
 data_loc_sf_noNA <- data_loc_sf %>% na.omit()
 tm_shape(data_loc_sf_noNA) + tm_polygons(col = 'black')
 
+ggplot(fond_carte_idf, aes(long, lat, group = group)) +
+  geom_polygon(fill = "white", colour = "grey50") + 
+  geom_polygon(data = a, mapping = aes( fill = "EVO_DEC_D1")) +
+  coord_quickmap() 
+
+#### Stats desc spatiales ####
+
+#Indice de Moran pour l'autocorrélation spatiale globale, package spdep
+#On dégage l'ile Saint-Louis qui n'a pas de voisins : crée des erreurs
+
+iris.nb <- poly2nb(data_loc_sf[-60,])
+iris.lw <- nb2listw(iris.nb, zero.policy = FALSE)
+iris.data <- as.data.frame(data_loc_sf[-60,])
+
+iris.nb
+iris.lw
+
+for(var in liste_var_reg_12_20){
+  varevo <- paste("EVO", var, sep = "_")
+  txt <- paste("moran.test(iris.data$", varevo,", iris.lw, zero.policy = FALSE, na.action = na.omit)")
+  eval(parse(text = txt))
+}
+
+tm_shape(data_loc_sf[-60,]) + tm_polygons(col = "EVO_DEC_TP60")
+
+moran.test(iris.data$EVO_DEC_MED, iris.lw, zero.policy = FALSE, na.action = na.omit)
+moran.mc(iris.data$EVO_DEC_MED, iris.lw, nsim = 1000, zero.policy = FALSE, na.action = na.omit)
+
+# Autocorrélation spatiale locale
+
+localG_perm(iris.data$EVO_DEC_TP60, iris.lw, nsim = 1000, zero.policy = FALSE)
+
+# spdep n'est pas du tout robuste aux données manquantes
+# Pb si on enlève juste les lignes sans data, iris.lw n'est plus de même taille que x : erreur
+# Si on ajuste iris.lw également, fortes chances de se trouver avec des Iris sans voisins : erreur
+
+test_autocorrelation_spatiale <- function(var){
+  # Test de moran : H_0 = pas d'autocorrélation spatiale, H_1 = présence d'autocorr. spatiale
+  test_moran <- moran.test(var, iris.lw, zero.policy = FALSE, na.action = na.omit)
+  xtable(test_moran)
+}
+
+# Visu IRIS avec données complètes
+# Environ 60% des observations incomplètes
+data_loc_sf_noNA <- data_loc_sf %>% na.omit()
+tm_shape(data_loc_sf_noNA) + tm_polygons(col = 'black')
