@@ -104,7 +104,10 @@ trace_pval_Bonf(dt_recap, alpha, titre_save, titre, scale_y)
 ########################### ANALYSE PAR IV  ####################################
 ################################################################################
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> parent of 7f24004 (Menage)
 ## Distance à l'axe
 >>>>>>> parent of 7f24004 (Menage)
 data_loc <- Variable_distance_aeroport(copy(filo_merged))
@@ -221,13 +224,113 @@ leg2007comm[, pvoixMAJO := rowSums(.SD, na.rm=T),.SDcols=liste_partis_majorite]
 
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 leg2007comm
 filo_merged[, codecommune := substring(IRIS, 1, 5)]
+=======
+# Elections - V1
+marge_a_50_pct <- 10 # En pourcentage d'écart
+data_loc <- Variable_elections_legislative(copy(filo_merged), marge_a_50_pct)
+dt_recap2 <- Faire_regression_IV(data_loc[Z_instru == 1],var_instru = "pvoixMAJO",liste_var_reg_12_20, liste_var_reg_13_20, Ponderer_regression,
+                                liste_var_demographie, modeliser_relatif = modeliser_relatif, var_clustering = "LIBCOM", var_controle = "")
+l <- c("variable_label","Estimate_95", 'pvalue')
+dt_recap2[,..l][order(pvalue)]
+print(xtable(dt_recap2[,..l][order(pvalue)]), include.rownames=FALSE)
+
+
+# Elections - V2 ==> LA BONNE 
+data_loc[, MAJO_plus_50 := pvoixMAJO >= 0.5]
+dt_recap2 <- Faire_regression_IV(data_loc[Z_instru == 1],var_instru = "MAJO_plus_50",liste_var_reg_12_20, liste_var_reg_13_20, Ponderer_regression,
+                                 liste_var_demographie, modeliser_relatif = modeliser_relatif, var_clustering = "LIBCOM", var_controle = "pvoixMAJO")
+l <- c("variable_label","Estimate_95", 'pvalue')
+dt_recap2[,..l][order(pvalue)]
+print(xtable(dt_recap2[,..l][order(pvalue)]), include.rownames=FALSE)
+>>>>>>> parent of 7f24004 (Menage)
 
 
 l <- c("pvoixOPPOS", "pvoixMAJO", "codecommune")
 filo_merged <- merge(filo_merged, leg2007comm[,..l], by = "codecommune", all.x = TRUE)
 
+################################################################################
+########################### BROUILLON EN DESSOUS ###############################
+################################################################################
+
+l <- c("IRIS", "Evolution", "P20_POP", "P12_POP")
+filo_merged[, Evolution := P20_POP - P12_POP][,..l][IRIS == '956800110']
+data_loc[, Evolution := P20_POP - P12_POP][,..l][IRIS == '940810306']
+
+14260 - 14040
+
+data_loc$P12_POP
+
+pop_2020[IRIS == '956800110']
+
+# data_loc <- Variable_elections_legislative(copy(filo_merged), marge_a_50_pct)
+# dt_recap <- Faire_regression_IV(data_loc,var_instru = "Z_instru",liste_var_reg_12_20, liste_var_reg_13_20, Ponderer_regression, liste_var_demographie, modeliser_relatif = modeliser_relatif, var_clustering = "LIBCOM")
+# 
+# l <- c("variable_label","Estimate_95", 'pvalue')
+# dt_recap[,..l][order(pvalue)]
+# print(xtable(dt_recap[,..l][order(pvalue)]), include.rownames=FALSE)
+# 
+# l <- c("variable_label","pval_weak", "pval_WH")
+# print(xtable(dt_recap[,..l]), include.rownames=FALSE)
+# 
+#   
+# 
+# cor(filo_merged$pvoixOPPOS, filo_merged$beneficiaire)
+# 
+# 
+# dt_recap_merged <- merge(dt_recap_copy, dt_recap, by = c("variable", "variable_label"), suffixes = c("_Distance","_Elections"))
+# 
+# l <- c("variable_label", "Estimate_Distance", "Estimate_Elections", "std_error_Distance", "std_error_Elections")
+
+# Weak instruments : pval très faible = on rejette HO = "l'instrument est faible" ==> OUF
+# Wu-Hausman : pval très faible = on rejette HO = "OLS et IV sont également consistant" ==> OUF : on y gagne avec l'IV !!!
+# Sargan : Uniquement dans le cas où on a plusieurs IV
+
+# This presentation provides a decent overview with worked examples.
+# 
+# Weak instruments means that the instrument has a low correlation with the endogenous explanatory variable. This could result in a larger variance in the coefficient, and severe finite-sample bias. "The cure can be worse than the disease" (Bound, Jaeger, Baker, 1993/1995). See here for more details. From the help file for AER, it says it does an F-test on the first stage regression; I believe the null is that the instrument is weak. For the model you report, the null is rejected, so you can move forward with the assumption that the instrument is sufficiently strong.
+# 
+# Wu-Hausman tests that IV is just as consistent as OLS, and since OLS is more efficient, it would be preferable. The null here is that they are equally consistent; in this output, Wu-Hausman is significant at the p<0.1 level, so if you are OK with that confidence level, that would mean IV is consistent and OLS is not.
+# 
+# Sargan tests overidentification restrictions. The idea is that if you have more than one instrument per endogenous variable, the model is overidentified, and you have some excess information. All of the instruments must be valid for the inferences to be correct. So it tests that all exogenous instruments are in fact exogenous, and uncorrelated with the model residuals. If it is significant, it means that you don't have valid instruments (somewhere in there, as this is a global test). In this case, this isn't a concern. This can get more complex, and researchers have suggested doing further analysis (see this).
+# data_loc <- Variable_distance_aeroport(copy(filo_merged))
+# var <- "DEC_D1"
+# 
+# var_20 <- paste(var, "20", sep = "")
+# var_12 <- paste(var, "12", sep = "")
+# data_loc[, Evolution := get(var_20) - get(var_12)]
+# 
+# sous_dt <- data_loc[TYP_IRIS_20 == 'H']
+# sous_dt$LIBCOM <- as.factor(sous_dt$LIBCOM)
+# sous_dt$beneficiaire <- as.numeric(sous_dt$beneficiaire)
+# 
+# 
+# model_iv <- ivreg(Evolution ~ beneficiaire | distance_aeroport, data = sous_dt, na.action = na.omit)
+# 
+# # Calcul des erreurs standards clusterisées
+# clustered_se <- coeftest(model_iv, vcov. = vcovHC(model_iv, type = "HC1", cluster = "LIBCOM"))
+# # Calcul des intervalles de confiance à 95%
+# conf_int <- confint(clustered_se)
+# ligne_IC <- conf_int[2,]
+# df_loc$std_error <- (df_loc$Estimate - ligne_IC[1])/1.96
+# # Affichage des intervalles de confiance
+# conf_int
+# ligne_IC <- conf_int[2,]
+# df_loc$std_error <- (df_loc$Estimate - ligne_IC[1])/1.96
+# df_loc$std_error_p <- (ligne_IC[2] - df_loc$Estimate)/1.96
+# 
+# #  (dt_recap$Estimate - IC)/1.96 = dt_recap$std_error
+# # dt_recap$Estimate_max - dt_recap$Estimate = 1.96*dt_recap$std_error
+# df_loc <- as.data.table(summary(model_iv)$coefficients)[2,]
+# setnames(df_loc, "Pr(>|t|)", "pvalue")
+# setnames(df_loc, "Std. Error", "std_error")
+# df_loc$variable <- var
+# df_loc_weak <- as.data.table(summary(model)$diagnostics)[1,]
+# df_loc$pval_weak <- df_loc_weak$`p-value`
+# df_loc_WH <- as.data.table(summary(model)$diagnostics)[2,]
+# df_loc$pval_WH <- df_loc_WH$`p-value`
 
 data_loc <- copy(filo_merged)
 dt_recap <- Faire_regression_IV_legislatives_evolution_traitement(data_loc, liste_var_reg_12_20, liste_var_reg_13_20, Ponderer_regression, liste_var_demographie)
@@ -237,6 +340,7 @@ dt_recap$Estimate_max <- dt_recap$Estimate + 1.96*dt_recap$std_error
 
 dt_recap$Estimate_95 <- paste("[", round(dt_recap$Estimate_min, 2), " ; ", round(dt_recap$Estimate_max, 2), "]", sep = "")
 
+<<<<<<< HEAD
 l <- c("variable_label", "Estimate_min", "Estimate_max","Estimate_95", 'pvalue')
 =======
 # Elections - V1
@@ -370,6 +474,8 @@ pop_2020[IRIS == '956800110']
 
 <<<<<<< HEAD
 =======
+=======
+>>>>>>> parent of 7f24004 (Menage)
 
 model <- ivreg(Evolution ~ beneficiaire | distance_aeroport | cluster(LIBCOM), data = sous_dt, na.rm = TRUE)
 
@@ -439,6 +545,9 @@ model <- ivreg(Y ~ X | Z | cluster(C), data = nom_de_votre_dataframe)
 # 
 # leg2007comm[VERIF_pvoix >= 1.15]
 
+<<<<<<< HEAD
+>>>>>>> parent of 7f24004 (Menage)
+=======
 >>>>>>> parent of 7f24004 (Menage)
 # ########## Puis les stats des à compléter.... ##########
 # 
