@@ -25,19 +25,12 @@ source(paste(repo_prgm , "04_IRIS_Traites_et_temoins.R" , sep = "/"))
 source(paste(repo_prgm , "05_Traces_graphiques.R" , sep = "/"))
 source(paste(repo_prgm , "06_Econometrie.R" , sep = "/"))
 
-modeliser_relatif <- FALSE
-
 
 liste_var_reg_12_20 <- c("DEC_TP60","DEC_MED","DEC_D1", "DEC_D2", "DEC_D3", "DEC_D4", "DEC_D6", "DEC_D7", "DEC_D8", "DEC_D9",
                          "DEC_RD", "DEC_PCHO", "DEC_PPEN", "DEC_PAUT")
 liste_var_reg_13_20 <- c("DEC_Q1", "DEC_Q3","DEC_S80S20", "DEC_GI", "DEC_PTSA", "DEC_PBEN")
 
 liste_var_demographie <- c("POP", "POP0014", "POP1529",	"POP3044",	"POP4559","POP6074","POP75P") # Le nom des variables sélectionnées dans démo, sans le préfix (ex P14_)
-
-liste_dep_idf <- c('75', '77', '78', '91', '92', '93', '94', '95')
-liste_partis_opposition <- c("pvoixDIV",'pvoixAUG','pvoixPCF','pvoixPS','pvoixRDG','pvoixDVG','pvoixVEC','pvoixECO','pvoixUDFD','pvoixDIV','pvoixMPF','pvoixFN','pvoixAUD')
-liste_partis_majorite <- c('pvoixUMP', 'pvoixDVD')
-
 ################################################################################
 #### CREATION ET IMPORT DE BASES ===============================================
 ################################################################################
@@ -100,16 +93,20 @@ filo_merged[, mean(DEC_MED12, na.rm = TRUE), by = 'beneficiaire']
 ################################################################################
 ########################### ANALYSE PAR IV  ####################################
 ################################################################################
-
 ## Distance à l'axe
-data_loc <- Variable_distance_aeroport(copy(filo_merged))
-var_instru <- "distance_aeroport"
-dt_recap1 <- Faire_regression_IV(data_loc,var_instru = var_instru,liste_var_reg_12_20, liste_var_reg_13_20, Ponderer_regression,
-                                liste_var_demographie, modeliser_relatif = modeliser_relatif, var_clustering = "LIBCOM")
 
+data_loc <- Variable_distance_aeroport(copy(filo_merged))
+dt_recap <- Faire_regression_IV_aeroport_evolution_traitement(data_loc, liste_var_reg_12_20, liste_var_reg_13_20, Ponderer_regression, liste_var_demographie)
+dt_recap <- ajout_label_variables_filosofi(dt_recap)
+dt_recap$Estimate_min <- dt_recap$Estimate - 1.96*dt_recap$std_error
+dt_recap$Estimate_max <- dt_recap$Estimate + 1.96*dt_recap$std_error
+
+dt_recap$Estimate_95 <- paste("[", round(dt_recap$Estimate_min, 2), " ; ", round(dt_recap$Estimate_max, 2), "]", sep = "")
+
+l <- c("variable_label", "Estimate_min", "Estimate_max","Estimate_95", 'pvalue')
 l <- c("variable_label","Estimate_95", 'pvalue')
-dt_recap1[,..l][order(pvalue)]
-print(xtable(dt_recap1[,..l][order(pvalue)]), include.rownames=FALSE)
+dt_recap[,..l][order(pvalue)]
+print(xtable(dt_recap[,..l][order(pvalue)]), include.rownames=FALSE)
 
 alpha <- 0.10
 dt_recap1 <- Ajout_pval_BH(dt_recap1, alpha)
@@ -147,3 +144,4 @@ dt_recap2 <- Faire_regression_IV(data_loc[Z_instru == 1],var_instru = "pvoixMAJO
 l <- c("variable_label","Estimate_95", 'pvalue')
 dt_recap2[,..l][order(pvalue)]
 print(xtable(dt_recap2[,..l][order(pvalue)]), include.rownames=FALSE)
+
