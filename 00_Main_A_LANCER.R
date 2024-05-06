@@ -42,9 +42,6 @@ if(! utiliser_filo_merged_sauvegardee){
   load(paste(repo_data, "filo_merged.RData", sep = "/"))
 }
 
-# Il faudrait lancer le script 03 ici pour gérer les IRIS modifiés/Créés/supprimés ==> Script à terminer
-# source(paste(repo_prgm , "03_Gestion_IRIS_modifs_par_annee.R" , sep = "/"))
-
 # On assigne la variable de traitement, rayon pour traitement des IRIS dans un certain rayon autour des gares GPE
 data_loc <- copy(filo_merged)
 dist_rayon_loc <- dist_rayon
@@ -54,7 +51,7 @@ filo_merged <- Assigner_traitement(dist_rayon, data_loc)
 table(filo_merged$beneficiaire) # On a 67 IRIS bénéficiaires pour 69 gares
 
 ################################################################################
-#### ECONOMETRIE ===============================================================
+#### METHODE DE DIFF DE DIFF  ##################################################
 ################################################################################
 # Régression de évolution des variables socio-éco sur 8 ans par la variable de traitement
 
@@ -87,22 +84,20 @@ scale_y <- "identity" # identity ou log10 pour l'axe y
 trace_pval_Bonf(dt_recap, alpha, titre_save, titre, scale_y)
 
 
+filo_merged[, mean(DEC_MED20 - DEC_MED12, na.rm = TRUE), by = 'beneficiaire']
+filo_merged[, mean(DEC_MED20, na.rm = TRUE), by = 'beneficiaire']
+filo_merged[, mean(DEC_MED12, na.rm = TRUE), by = 'beneficiaire']
 
-# ############ QQ VERIFS
-# mean(filo_merged[beneficiaire == 1]$DEC_D220 - filo_merged[beneficiaire == 1]$DEC_D212, na.rm = TRUE)
-# mean(filo_merged[beneficiaire == 0]$DEC_D220 - filo_merged[beneficiaire == 0]$DEC_D212, na.rm = TRUE)
-# 
-# mean(filo_merged[beneficiaire == 1]$DEC_D220, na.rm = TRUE) - mean(filo_merged[beneficiaire == 0 & substr(IRIS, 1, 2) != "75"]$DEC_D220, na.rm = TRUE)
-# mean(filo_merged[beneficiaire == 1]$DEC_D220, na.rm = TRUE) - mean(filo_merged[beneficiaire == 0]$DEC_D220, na.rm = TRUE)
-# mean(filo_merged[beneficiaire == 1]$DEC_D212, na.rm = TRUE) - mean(filo_merged[beneficiaire == 0]$DEC_D212, na.rm = TRUE)
-# 
-# 
-# table(filo_merged$DEC_D220)
 
 
 ################################################################################
 ########################### ANALYSE PAR IV  ####################################
 ################################################################################
+<<<<<<< HEAD
+=======
+## Distance à l'axe
+
+>>>>>>> 92b62faf8a20074200d872d6ff75b4b1b4be7000
 data_loc <- Variable_distance_aeroport(copy(filo_merged))
 dt_recap <- Faire_regression_IV_aeroport_evolution_traitement(data_loc, liste_var_reg_12_20, liste_var_reg_13_20, Ponderer_regression, liste_var_demographie)
 dt_recap <- ajout_label_variables_filosofi(dt_recap)
@@ -116,12 +111,22 @@ l <- c("variable_label","Estimate_95", 'pvalue')
 dt_recap[,..l][order(pvalue)]
 print(xtable(dt_recap[,..l][order(pvalue)]), include.rownames=FALSE)
 
+<<<<<<< HEAD
 l <- c("variable_label","pval_weak", "pval_WH")
 print(xtable(dt_recap[,..l]), include.rownames=FALSE)
+=======
+alpha <- 0.10
+dt_recap1 <- Ajout_pval_BH(dt_recap1, alpha)
+dt_recap1 <- Ajout_pval_Bonf(dt_recap1, alpha)
+
+l <- c("variable_label", "pvalue", "pval_Bonf", "pval_BH", "Estimate_95")
+print(xtable(dt_recap1[,..l]), include.rownames=FALSE)
+>>>>>>> 92b62faf8a20074200d872d6ff75b4b1b4be7000
 
 
 # Ajustements des p-value pour test Wu-Hausman (pas d'intérêt pour weak instruments étant donné pval < 10e-13) pour 
 
+<<<<<<< HEAD
 dt_recap_WH <- dt_recap[ , c("Estimate", "pval_WH", "variable", "Annees", "variable_label"), with = TRUE]
 colnames(dt_recap_WH)[2] <- "pvalue"
 dt_recap_WH <- Ajout_pval_BH(dt_recap_WH, alpha)
@@ -139,8 +144,22 @@ titre <- "pvalue et significativité\nau sens de la procédure de Bonferroni"
 titre_save <- paste(repo_sorties, "Trace_IV_pval_WH_cor_Bonf.pdf", sep = "/")
 scale_y <- "identity" # identity ou log10 pour l'axe y
 trace_pval_Bonf(dt_recap_WH, alpha, titre_save, titre, scale_y)
+=======
+# Régressions variable politique
+data_loc[, MAJO_plus_50 := pvoixMAJO >= 0.5]
+dt_recap2 <- Faire_regression_IV(data_loc[Z_instru == 1],var_instru = "MAJO_plus_50",liste_var_reg_12_20, liste_var_reg_13_20, Ponderer_regression,
+                                 liste_var_demographie, modeliser_relatif = modeliser_relatif, var_clustering = "LIBCOM", var_controle = "pvoixMAJO")
+l <- c("variable_label","Estimate_95", 'pvalue')
+dt_recap2[,..l][order(pvalue)]
+print(xtable(dt_recap2[,..l][order(pvalue)]), include.rownames=FALSE)
 
+>>>>>>> 92b62faf8a20074200d872d6ff75b4b1b4be7000
 
+alpha <- 0.10
+dt_recap2 <- Ajout_pval_BH(dt_recap2, alpha)
+dt_recap2 <- Ajout_pval_Bonf(dt_recap2, alpha)
+
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 
@@ -358,3 +377,20 @@ cor(filo_merged$pvoixOPPOS, filo_merged$beneficiaire)
 # # 26 colonnes header
 # 
 # "municipales-2008-résultats-bureaux_vote-tour2.csv"
+=======
+l <- c("variable_label", "pvalue", "pval_Bonf", "pval_BH", "Estimate_95")
+print(xtable(dt_recap2[,..l]), include.rownames=FALSE)
+
+
+
+
+# Une deuxième version des régressions, sans variable de contrôle
+marge_a_50_pct <- 10 # En pourcentage d'écart
+data_loc <- Variable_elections_legislative(copy(filo_merged), marge_a_50_pct)
+dt_recap2 <- Faire_regression_IV(data_loc[Z_instru == 1],var_instru = "pvoixMAJO",liste_var_reg_12_20, liste_var_reg_13_20, Ponderer_regression,
+                                 liste_var_demographie, modeliser_relatif = modeliser_relatif, var_clustering = "LIBCOM", var_controle = "")
+l <- c("variable_label","Estimate_95", 'pvalue')
+dt_recap2[,..l][order(pvalue)]
+print(xtable(dt_recap2[,..l][order(pvalue)]), include.rownames=FALSE)
+
+>>>>>>> 92b62faf8a20074200d872d6ff75b4b1b4be7000
