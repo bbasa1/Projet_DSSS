@@ -27,3 +27,6 @@ library(spdep)
 
 #LateX
 library(xtable)
+
+library(lmtest)
+library(sandwich)
